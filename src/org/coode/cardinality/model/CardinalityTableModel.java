@@ -1,6 +1,5 @@
 package org.coode.cardinality.model;
 
-import org.apache.log4j.Logger;
 import org.coode.cardinality.prefs.CardinalityPreferences;
 import org.coode.cardinality.prefs.CardinalityProperties;
 import org.coode.cardinality.util.ClosureUtils;
@@ -118,25 +117,18 @@ public class CardinalityTableModel extends AbstractTableModel {
 
         rows.clear();
 
-        try {
-            if (cls != null) {
-                Set<OWLDescription> directSupers = RestrictionUtils.getDirectRestrictionsOnClass(cls, mngr);
-                processOWLRestrictions(directSupers, false);
+        if (cls != null) {
+            Set<OWLDescription> directSupers = RestrictionUtils.getDirectRestrictionsOnClass(cls, mngr);
+            processOWLRestrictions(directSupers, false);
 
-                if (showInherited()) {
-                    Set<OWLDescription> inheritedRestrs = RestrictionUtils.getInheritedRestrictionsOnClass(cls, mngr);
-                    processOWLRestrictions(inheritedRestrs, true);
-                }
-
-                Collections.sort(rows);
+            if (showInherited()) {
+                Set<OWLDescription> inheritedRestrs = RestrictionUtils.getInheritedRestrictionsOnClass(cls, mngr);
+                processOWLRestrictions(inheritedRestrs, true);
             }
+
+            Collections.sort(rows);
         }
-        catch (OWLException e) {
-            Logger.getLogger(CardinalityTableModel.class).error(e);
-        }
-        finally {
-            fireTableDataChanged();
-        }
+        fireTableDataChanged();
     }
 
     /**
@@ -211,7 +203,7 @@ public class CardinalityTableModel extends AbstractTableModel {
 
 //////////////////////////////////////////////////////////
 
-    private void processOWLRestrictions(Collection<OWLDescription> restrs, boolean readonly) throws OWLException {
+    private void processOWLRestrictions(Collection<OWLDescription> restrs, boolean readonly) {
         for (OWLDescription restr : restrs) { // any restriction
             CardinalityRow newRow = createRow(restr, readonly);
             if (newRow != null) {
@@ -222,7 +214,7 @@ public class CardinalityTableModel extends AbstractTableModel {
         }
     }
 
-    private CardinalityRow createRow(OWLDescription descr, boolean readonly) throws OWLException {
+    private CardinalityRow createRow(OWLDescription descr, boolean readonly) {
         CardinalityRow row = null;
         if ((RestrictionUtils.isNotSome(descr)) ||
             ((descr instanceof OWLRestriction) && !(descr instanceof OWLObjectAllRestriction))) {
@@ -243,7 +235,7 @@ public class CardinalityTableModel extends AbstractTableModel {
         return row;
     }
 
-    private boolean mergeWithExistingRows(CardinalityRow newRow) throws OWLException {
+    private boolean mergeWithExistingRows(CardinalityRow newRow) {
         boolean merged = false;
         for (Iterator<CardinalityRow> j = rows.iterator(); j.hasNext() && !merged;) {
             CardinalityRow cardiRow = j.next();

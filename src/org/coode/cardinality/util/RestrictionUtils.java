@@ -94,7 +94,12 @@ public class RestrictionUtils {
     public static Set<OWLDescription> filterRestrictions(Set<OWLDescription> all) {
         Set<OWLDescription> filtered = new HashSet<OWLDescription>();
         for (OWLDescription descr : all) {
-            if (descr instanceof OWLRestriction) {
+            // @@TODO if we can make this read only, we should extract restrs from intersections (hard to maintain editing)
+//            if (descr instanceof OWLObjectIntersectionOf){ // split the contents of intersections
+//                filtered.addAll(filterRestrictions(((OWLObjectIntersectionOf)descr).getOperands()));
+//            }
+//            else
+                if (descr instanceof OWLRestriction) {
                 filtered.add(descr);
             }
             else if (isNotSome(descr)) {

@@ -55,9 +55,9 @@ public class CardinalityTable extends BasicLinkedOWLObjectTable {
 
     private static int[] colWidth;
 
-    private TableCellRenderer defaultRen;
-    private TableCellRenderer entityRen;
-    private TableCellRenderer closureRen;
+    private DefaultTableCellRenderer defaultRen;
+    private OWLCellRenderer entityRen;
+    private ClosureRenderer closureRen;
 
     private TableCellEditor defaultEditor;
     private TableCellEditor propEditor;
@@ -78,11 +78,18 @@ public class CardinalityTable extends BasicLinkedOWLObjectTable {
         }
 
         setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+        getTableHeader().setReorderingAllowed(false);
 
         // create the renderers
         entityRen = new OWLCellRenderer(eKit);
+        entityRen.setTransparent();
+        entityRen.setHighlightKeywords(true);
+
         defaultRen = new DefaultTableCellRenderer();
+        defaultRen.setVerticalAlignment(SwingConstants.TOP);
+
         closureRen = new ClosureRenderer(eKit.getOWLModelManager());
+        closureRen.setVerticalAlignment(SwingConstants.TOP);
 
         // create the editors
         propEditor = new DefaultCellEditor(new PropCombo(eKit)) {
@@ -95,12 +102,14 @@ public class CardinalityTable extends BasicLinkedOWLObjectTable {
                 }
             }
         };
+
         JTextField field = new JTextField();
         field.addFocusListener(new FocusAdapter() {
             public void focusLost(FocusEvent e) {
                 defaultEditor.cancelCellEditing();
             }
         });
+
         fillerEditor = new OWLDescriptionCellEditor(eKit);
         defaultEditor = new DefaultCellEditor(field);
     }
@@ -152,7 +161,9 @@ public class CardinalityTable extends BasicLinkedOWLObjectTable {
             else {
                 c.setForeground(Color.BLACK);
             }
+            setRowHeight(row, Math.max(c.getPreferredSize().height+2, getRowHeight(row)));
         }
+
         return c;
     }
 
@@ -160,6 +171,7 @@ public class CardinalityTable extends BasicLinkedOWLObjectTable {
         switch (col) {
             case CardinalityTableModel.COL_PROP:
             case CardinalityTableModel.COL_FILLER:
+                entityRen.setInferred(getModel().getRestriction(row).isReadOnly());
                 return entityRen;
             case CardinalityTableModel.COL_CLOSED:
                 return closureRen;
