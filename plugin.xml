@@ -1,0 +1,30 @@
+<?xml version="1.0" ?>
+<!DOCTYPE plugin PUBLIC "-//JPF//Java Plug-in Manifest 0.4" "http://jpf.sourceforge.net/plugin_0_4.dtd">
+
+<plugin id="org.coode.cardinality" version="1.0.4.CardinalityView">
+
+    <attributes>
+        <attribute id="update-url" value="http://co-ode-owl-plugins.googlecode.com/svn/trunk/cardinality/update.xml"/>
+    </attributes>
+
+    <requires>
+        <import plugin-id="org.protege.editor.core.application"/>
+        <import plugin-id="org.protege.editor.owl"/>
+    </requires>
+
+    <runtime>
+        <library id="CardinalityView" path="classes/" type="code">
+        </library>
+        <library id="resources" path="resources/" type="resources"/>
+    </runtime>
+
+
+    <extension plugin-id="org.protege.editor.core.application" point-id="ViewComponent" id="org.coode.CardinalityView">
+        <parameter id="label" value="Cardinality View"/>
+        <parameter id="class" value="org.coode.cardinality.ui.CardinalityView"/>
+        <parameter id="headerColor" value="@org.protege.classcolor"/>
+        <parameter id="category" value="@org.protege.classcategory"/>
+    </extension>
+
+</plugin>
+
