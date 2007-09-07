@@ -250,9 +250,6 @@ public class CardinalityRowImpl implements CardinalityRow {
     }
 
     public OWLObject getFiller() {
-        if (prop instanceof OWLDataProperty){
-            System.out.println("filler = " + filler);
-        }
         return filler;
     }
 

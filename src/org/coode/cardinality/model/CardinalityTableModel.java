@@ -190,7 +190,6 @@ public class CardinalityTableModel extends AbstractTableModel {
     }
 
     public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
-        System.out.println("setvalue = " + aValue);
         List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
         CardinalityRow restr = rowFactory.getRows().get(rowIndex);
         switch (columnIndex) {
