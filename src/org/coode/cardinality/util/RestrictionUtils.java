@@ -25,16 +25,7 @@ public class RestrictionUtils {
      * @return the filler of the restriction (cardi will be qualified)
      */
     public static OWLObject getOWLFiller(OWLDescription owlRestr) {
-        if (owlRestr instanceof OWLQuantifiedRestriction) {
-            return ((OWLQuantifiedRestriction) owlRestr).getFiller();
-        }
-        else if (owlRestr instanceof OWLObjectValueRestriction) {
-            return ((OWLObjectValueRestriction) owlRestr).getValue();
-        }
-        else if (isNotSome(owlRestr)) {
-            return ((OWLObjectSomeRestriction) ((OWLObjectComplementOf) owlRestr).getOperand()).getFiller();
-        }
-        return null;
+        return new FillerFinder().getFiller(owlRestr);
     }
 
     /**
@@ -183,7 +174,7 @@ public class RestrictionUtils {
 //            for (Iterator<OWLClass> it = set.iterator(); it.hasNext();) {
 //                OWLClass subject = it.next();
 //                if (subject.getURI().equals(OWLVocabularyAdapter.INSTANCE.getNothing())) {
-//                    it.remove();
+//                    it.removeRows();
 //                }
 //                else {
 //                    result.add(subject);

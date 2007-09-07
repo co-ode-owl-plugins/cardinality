@@ -1,4 +1,4 @@
-package org.coode.cardinality.ui;
+package org.coode.cardinality.ui.celleditor;
 
 import org.apache.log4j.Logger;
 import org.protege.editor.owl.OWLEditorKit;
@@ -85,7 +85,7 @@ public class OWLDescriptionCellEditor extends AbstractCellEditor implements Tabl
     }
 
     /**
-     * Makes the cell clsdescriptioneditor exandable.  If the cell clsdescriptioneditor is
+     * Makes the cell clsdescriptioneditor expandable.  If the cell clsdescriptioneditor is
      * expandable, then the the table
      * row that contains the cell being edited is expanded to give
      * the user a few lines to edit the expression.

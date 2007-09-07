@@ -49,6 +49,7 @@ public class CardinalityView extends AbstractOWLClassViewComponent {
 
     private DeleteRowAction deleteRowAction;
 
+
     public void initialiseClassView() throws Exception {
         setLayout(new BorderLayout(6, 6));
 
@@ -65,10 +66,12 @@ public class CardinalityView extends AbstractOWLClassViewComponent {
     }
 
     protected OWLClass updateView(OWLClass selectedClass) {
-        table.setSubject(selectedClass);
+        table.clearSelection();
+        table.getModel().setSubject(selectedClass);
         return selectedClass;
     }
 
     public void disposeView() {
+        table.dispose();
     }
 }

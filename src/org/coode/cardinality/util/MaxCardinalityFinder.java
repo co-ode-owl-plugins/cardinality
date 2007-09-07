@@ -46,20 +46,28 @@ public class MaxCardinalityFinder extends OWLObjectVisitorAdapter {
         return max;
     }
 
-    public void visit(OWLObjectMaxCardinalityRestriction cardi) {
-        max = cardi.getCardinality();
+    public void visit(OWLObjectMaxCardinalityRestriction restr) {
+        max = restr.getCardinality();
     }
 
-    public void visit(OWLObjectExactCardinalityRestriction cardi) {
-        max = cardi.getCardinality();
+    public void visit(OWLObjectExactCardinalityRestriction restr) {
+        max = restr.getCardinality();
     }
 
-    public void visit(OWLDataMaxCardinalityRestriction cardi) {
-        max = cardi.getCardinality();
+    public void visit(OWLObjectValueRestriction restr){
+        max = 1;
     }
 
-    public void visit(OWLDataExactCardinalityRestriction cardi) {
-        max = cardi.getCardinality();
+    public void visit(OWLDataMaxCardinalityRestriction restr) {
+        max = restr.getCardinality();
+    }
+
+    public void visit(OWLDataExactCardinalityRestriction restr) {
+        max = restr.getCardinality();
+    }
+
+    public void visit(OWLDataValueRestriction owlDataValueRestriction) {
+        max = 1;
     }
 
     public void visit(OWLObjectComplementOf owlObjectComplementOf) {

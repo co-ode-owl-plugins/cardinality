@@ -66,13 +66,13 @@ public class CardinalityRowImpl implements CardinalityRow {
 
     private ClosureUtils closureUtils;
 
-    private CardinalityTableModel model;
+    private CardinalityRowFactory factory;
 
     protected final OWLObjectComparator<OWLObject> comparator;
 
     private boolean changed = false;
 
-    public CardinalityRowImpl(OWLClass subject, OWLObject filler, OWLProperty objProp,
+    public CardinalityRowImpl(OWLClass subject, OWLProperty objProp, OWLObject filler,
                               int min, int max, boolean closed, OWLModelManager mngr) {
         this.subject = subject;
         this.filler = filler;
@@ -90,8 +90,8 @@ public class CardinalityRowImpl implements CardinalityRow {
         this.comparator = new OWLObjectComparator<OWLObject>(mngr);
     }
 
-    public void setModel(CardinalityTableModel model) {
-        this.model = model;
+    public void setFactory(CardinalityRowFactory factory) {
+        this.factory = factory;
     }
 
     public void merge(CardinalityRow row) {
@@ -133,7 +133,7 @@ public class CardinalityRowImpl implements CardinalityRow {
 
         final OWLDataFactory df = mngr.getOWLDataFactory();
 
-        // remove all existing restrictions
+        // removeRows all existing restrictions
         for (OWLDescription restr : editableRestrs) {
             final OWLSubClassAxiom owlSubClassAxiom = df.getOWLSubClassAxiom(subject, restr);
             changes.addAll(getDeleteAxiomFromAllOntologies(owlSubClassAxiom));
@@ -149,7 +149,7 @@ public class CardinalityRowImpl implements CardinalityRow {
 
             final OWLDataFactory df = mngr.getOWLDataFactory();
 
-            // remove all existing restrictions
+            // removeRows all existing restrictions
             for (OWLDescription restr : editableRestrs) {
                 OWLAxiom subclassAxiom = df.getOWLSubClassAxiom(subject, restr);
                 changes.addAll(getDeleteAxiomFromAllOntologies(subclassAxiom));
@@ -158,46 +158,7 @@ public class CardinalityRowImpl implements CardinalityRow {
             // @@TODO should really regenerate them in the correct place
             OWLOntology ont = mngr.getActiveOntology();
 
-            if (prop instanceof OWLObjectProperty) {
-                if (min == 1) {
-                    OWLDescription minRestr = df.getOWLObjectSomeRestriction((OWLObjectProperty)prop, (OWLDescription) filler);
-                    changes.add(new AddAxiom(ont, df.getOWLSubClassAxiom(subject, minRestr)));
-                }
-                else if (min >= 0) {
-                    OWLDescription minRestr = df.getOWLObjectMinCardinalityRestriction((OWLObjectProperty)prop, min, (OWLDescription) filler);
-                    changes.add(new AddAxiom(ont, df.getOWLSubClassAxiom(subject, minRestr)));
-                }
-
-                if (max == 0) { // transform into a negated some restriction
-                    OWLObjectSomeRestriction someRestr = df.getOWLObjectSomeRestriction((OWLObjectProperty)prop, (OWLDescription) filler);
-                    OWLDescription maxRestr = df.getOWLObjectComplementOf(someRestr);
-                    changes.add(new AddAxiom(ont, df.getOWLSubClassAxiom(subject, maxRestr)));
-                }
-                else if (max >= 0) {
-                    OWLDescription maxRestr = df.getOWLObjectMaxCardinalityRestriction((OWLObjectProperty)prop, max, (OWLDescription) filler);
-                    changes.add(new AddAxiom(ont, df.getOWLSubClassAxiom(subject, maxRestr)));
-                }
-            }
-            else{
-                if (min == 1) {
-                    OWLDescription minRestr = df.getOWLDataSomeRestriction((OWLDataProperty)prop, (OWLDataRange)filler);
-                    changes.add(new AddAxiom(ont, df.getOWLSubClassAxiom(subject, minRestr)));
-                }
-                else if (min >= 0) {
-                    OWLDescription minRestr = df.getOWLDataMinCardinalityRestriction((OWLDataProperty)prop, min, (OWLDataRange) filler);
-                    changes.add(new AddAxiom(ont, df.getOWLSubClassAxiom(subject, minRestr)));
-                }
-
-                if (max == 0) { // transform into a negated some restriction
-                    OWLDataSomeRestriction someRestr = df.getOWLDataSomeRestriction((OWLDataProperty)prop, (OWLDataRange) filler);
-                    OWLDescription maxRestr = df.getOWLObjectComplementOf(someRestr);
-                    changes.add(new AddAxiom(ont, df.getOWLSubClassAxiom(subject, maxRestr)));
-                }
-                else if (max >= 0) {
-                    OWLDescription maxRestr = df.getOWLDataMaxCardinalityRestriction((OWLDataProperty)prop, max, (OWLDataRange) filler);
-                    changes.add(new AddAxiom(ont, df.getOWLSubClassAxiom(subject, maxRestr)));
-                }
-            }
+            changes.addAll(CardinalityRowFactory.toOWL(this, ont, df));
 
             if (prop instanceof OWLObjectProperty){
                 changes.addAll(updateClosure());
@@ -247,7 +208,7 @@ public class CardinalityRowImpl implements CardinalityRow {
 
         OWLDataFactory df = mngr.getOWLDataFactory();
 
-        if (removeOldClosureOnOldProp) { // remove old closure on old prop
+        if (removeOldClosureOnOldProp) { // removeRows old closure on old prop
             OWLObjectAllRestriction oldClosure = closureUtils.getClosureAxiom(subject, (OWLObjectProperty)originalProperty, originalFiller);
             if (oldClosure != null) {
                 OWLAxiom subclassAxiom = df.getOWLSubClassAxiom(subject, oldClosure);
@@ -255,7 +216,7 @@ public class CardinalityRowImpl implements CardinalityRow {
             }
         }
 
-        if (removeOldClosureOnNewProp) { // remove old closure axioms along new prop
+        if (removeOldClosureOnNewProp) { // removeRows old closure axioms along new prop
             for (OWLObjectAllRestriction closure : closureUtils.getCandidateClosureAxioms(subject, (OWLObjectProperty)prop)) {
                 OWLAxiom subclassAxiom = df.getOWLSubClassAxiom(subject, closure);
                 changes.addAll(getDeleteAxiomFromAllOntologies(subclassAxiom));
@@ -263,7 +224,7 @@ public class CardinalityRowImpl implements CardinalityRow {
         }
 
         if (createNewClosureOnNewProp) { // create new closure on new prop
-            Set<OWLDescription> fillers = model.getFillers((OWLObjectProperty)prop);
+            Set<OWLDescription> fillers = factory.getFillers((OWLObjectProperty)prop);
             if (!fillers.isEmpty()) {
                 OWLObjectAllRestriction newClosure = closureUtils.createClosureAxiom((OWLObjectProperty)prop, fillers);
                 changes.add(new AddAxiom(mngr.getActiveOntology(), df.getOWLSubClassAxiom(subject, newClosure)));
@@ -271,7 +232,7 @@ public class CardinalityRowImpl implements CardinalityRow {
         }
 
         if (createNewClosureOnOldProp) { // create new closure on old prop
-            Set<OWLDescription> fillers = model.getFillers((OWLObjectProperty)originalProperty);
+            Set<OWLDescription> fillers = factory.getFillers((OWLObjectProperty)originalProperty);
             if (!fillers.isEmpty()) {
                 OWLObjectAllRestriction newClosure = closureUtils.createClosureAxiom((OWLObjectProperty)originalProperty, fillers);
                 changes.add(new AddAxiom(mngr.getActiveOntology(), df.getOWLSubClassAxiom(subject, newClosure)));
@@ -289,6 +250,9 @@ public class CardinalityRowImpl implements CardinalityRow {
     }
 
     public OWLObject getFiller() {
+        if (prop instanceof OWLDataProperty){
+            System.out.println("filler = " + filler);
+        }
         return filler;
     }
 

@@ -39,13 +39,11 @@ import java.util.Set;
  * <p/>
  * When using the term "Restriction" we mean any OWL restriction OR any negated object some restriction
  */
-public interface CardinalityRow extends Comparable {
+public interface CardinalityRow extends Comparable, Mergeable<CardinalityRow> {
 
     int NO_VALUE = -1;
 
-    void setModel(CardinalityTableModel model);
-
-    void merge(CardinalityRow row);
+    void setFactory(CardinalityRowFactory model);
 
     void addRestriction(OWLDescription restr, boolean readOnly);
 

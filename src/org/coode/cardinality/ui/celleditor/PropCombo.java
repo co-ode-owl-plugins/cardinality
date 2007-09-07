@@ -1,6 +1,5 @@
-package org.coode.cardinality.ui;
+package org.coode.cardinality.ui.celleditor;
 
-import org.coode.cardinality.prefs.CardinalityPreferences;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.model.OWLModelManager;
 import org.protege.editor.owl.model.event.EventType;
@@ -56,6 +55,11 @@ public class PropCombo extends JComboBox {
 
     private OWLEntityComparator<OWLProperty> comp;
 
+    public static final int OBJ_PROPS = 0;
+    public static final int DATA_PROPS = 1;
+
+    private int type;
+
     private OWLOntologyChangeListener ontologyChangeListener = new OWLOntologyChangeListener() {
         public void ontologiesChanged(List<? extends OWLOntologyChange> list) throws OWLException {
             for (OWLOntologyChange ontologyChange : list){
@@ -78,8 +82,10 @@ public class PropCombo extends JComboBox {
         }
     };
 
-    public PropCombo(OWLEditorKit eKit) {
+    public PropCombo(OWLEditorKit eKit, int type) {
         super();
+
+        this.type = type;
 
         mngr = eKit.getOWLModelManager();
 
@@ -109,9 +115,12 @@ public class PropCombo extends JComboBox {
     }
 
     private void load() {
-        List<OWLProperty> props = new LinkedList<OWLProperty>(mngr.getActiveOntology().getReferencedObjectProperties());
-        if (CardinalityPreferences.getInstance().getBoolean(CardinalityPreferences.OPT_EDIT_DT_PROPERTIES, false)) {
-            props.addAll(mngr.getActiveOntology().getReferencedDataProperties());
+        List<OWLProperty> props;
+        if (type == OBJ_PROPS){
+            props = new LinkedList<OWLProperty>(mngr.getActiveOntology().getReferencedObjectProperties());
+        }
+        else{
+            props = new LinkedList<OWLProperty>(mngr.getActiveOntology().getReferencedDataProperties());
         }
         Collections.sort(props, comp);
         addItems(props);
@@ -125,10 +134,11 @@ public class PropCombo extends JComboBox {
         }
     }
 
-    protected void finalize() throws Throwable {
+    public void dispose() {
         mngr.removeOntologyChangeListener(ontologyChangeListener);
         mngr.removeListener(activeOntologyListener);
+        ontologyChangeListener = null;
+        activeOntologyListener = null;
         mngr = null;
-        super.finalize();
     }
 }

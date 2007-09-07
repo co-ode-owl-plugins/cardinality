@@ -1,16 +1,19 @@
 package org.coode.cardinality.action;
 
+import org.coode.cardinality.model.CardinalityRow;
+import org.coode.cardinality.model.CardinalityRowFactory;
 import org.coode.cardinality.model.CardinalityTableModel;
 import org.coode.cardinality.ui.CardinalityTable;
+import org.coode.cardinality.ui.roweditor.CardinalityRowEditor;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.model.OWLModelManager;
 import org.protege.editor.owl.ui.OWLIcons;
-import org.protege.editor.owl.ui.UIHelper;
 import org.protege.editor.owl.ui.view.OWLSelectionViewAction;
-import org.semanticweb.owl.model.*;
+import org.semanticweb.owl.model.OWLOntologyChange;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
+import java.util.List;
 
 /*
  * Copyright (C) 2007, University of Manchester
@@ -48,40 +51,42 @@ import java.awt.event.ActionEvent;
 public class AddRowAction extends OWLSelectionViewAction {
 
     private CardinalityTable table;
-    private OWLModelManager mngr;
-    private UIHelper uihelper;
 
-    private OWLRestriction restr;
+    private OWLEditorKit eKit;
+
+    private CardinalityRowEditor editor;
+
+    private CardinalityRow newRow;
 
     public AddRowAction(CardinalityTable table, OWLEditorKit eKit) {
         super("Add row", OWLIcons.getIcon("class.add.png"));
         this.table = table;
-        this.mngr = eKit.getOWLModelManager();
-        uihelper = new UIHelper(eKit);
+        this.eKit = eKit;
     }
 
     public void updateState() {
         setEnabled(true);
     }
 
-    public void dispose() {
-    }
-
     public void actionPerformed(ActionEvent actionEvent) {
-        OWLObjectProperty prop = uihelper.pickOWLObjectProperty();
-        if (prop != null) {
-            OWLClass cls = uihelper.pickOWLClass();
-            if (cls != null) {
-                OWLOntology ontology = mngr.getActiveOntology();
-                OWLDataFactory df = mngr.getOWLDataFactory();
-                restr = df.getOWLObjectSomeRestriction(prop, cls);
+        if (editor == null){
+            editor = new CardinalityRowEditor(eKit, table.getModel().getSubject());
+        }
 
-                mngr.applyChange(new AddAxiom(ontology, df.getOWLSubClassAxiom(table.getSubject(), restr)));
+        if (editor.showDialog(table.getModel().getSubject()) == JOptionPane.OK_OPTION){
+            OWLModelManager mngr = eKit.getOWLModelManager();
+            newRow = editor.createRow();
+            if (newRow != null){
+                List<OWLOntologyChange> changes = CardinalityRowFactory.toOWL(newRow,
+                                                                              mngr.getActiveOntology(),
+                                                                              mngr.getOWLDataFactory());
+                mngr.applyChanges(changes);
+
+                // select the new row if possible
                 SwingUtilities.invokeLater(new Runnable() {
-
                     public void run() {
                         CardinalityTableModel model = table.getModel();
-                        int row = model.getRow(restr);
+                        int row = model.getRow(newRow);
                         if (row >= 0) {
                             table.getSelectionModel().setSelectionInterval(row, row);
                         }
@@ -89,5 +94,9 @@ public class AddRowAction extends OWLSelectionViewAction {
                 });
             }
         }
+    }
+
+    public void dispose() {
+        editor.dispose();
     }
 }

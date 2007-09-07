@@ -1,14 +1,15 @@
 package org.coode.cardinality.model;
 
-import org.coode.cardinality.prefs.CardinalityPreferences;
+import org.coode.cardinality.prefs.CardiPrefs;
 import org.coode.cardinality.prefs.CardinalityProperties;
-import org.coode.cardinality.util.ClosureUtils;
-import org.coode.cardinality.util.RestrictionUtils;
 import org.protege.editor.owl.model.OWLModelManager;
 import org.semanticweb.owl.model.*;
 
 import javax.swing.table.AbstractTableModel;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
+import java.util.Set;
 
 /*
  * Copyright (C) 2007, University of Manchester
@@ -55,241 +56,62 @@ public class CardinalityTableModel extends AbstractTableModel {
     private static final Class[] COL_CLASSES = {OWLObjectProperty.class,
                                                 Integer.class,
                                                 Integer.class,
-                                                OWLDescription.class,
+                                                OWLObject.class,
                                                 Boolean.class};
 
     private static String[] colNames;
 
-    private OWLClass cls = null;
-
-    private List<CardinalityRow> rows = new LinkedList<CardinalityRow>();
-
     private OWLModelManager mngr;
 
-    private ClosureUtils closureUtils;
+    private CardinalityRowFactory rowFactory;
 
     private OWLOntologyChangeListener cl = new OWLOntologyChangeListener() {
         public void ontologiesChanged(List<? extends OWLOntologyChange> list) throws OWLException {
-            boolean reload = false;
-            for (OWLOntologyChange ontologyChange : list){
-                OWLDescription subclass = null;
-                OWLDescription superclass = null;
-                OWLAxiom axiom = ontologyChange.getAxiom();
-                if (axiom instanceof OWLSubClassAxiom) {
-                    subclass = ((OWLSubClassAxiom) axiom).getSubClass();
-                    superclass = ((OWLSubClassAxiom) axiom).getSuperClass();
-                }
-
-                if (subclass != null) {
-                    if ((subclass == cls) ||
-                        (mngr.getOWLClassHierarchyProvider().getAncestors(cls).contains(subclass))) {
-                        if (superclass instanceof OWLClass ||
-                            superclass instanceof OWLRestriction ||
-                            superclass instanceof OWLObjectComplementOf) {
-                            reload = true;
-                        }
-                    }
-                }
-            }
-            if (reload){
-                reload();
-            }
+            handleOntologiesChanged(list);
         }
     };
 
     public CardinalityTableModel(OWLModelManager mngr) {
         super();
         this.mngr = mngr;
-        closureUtils = new ClosureUtils(mngr);
+        rowFactory = new CardinalityRowFactory(mngr);
+        rowFactory.setShowInherited(CardiPrefs.getInstance().getBoolean(CardiPrefs.OPT_SHOW_INHERITED_RESTRS, true));
         mngr.addOntologyChangeListener(cl);
     }
 
-    public void setSubject(OWLClass newClass) {
-        this.cls = newClass;
-        reload();
-    }
-
-    public OWLClass getSubject() {
-        return cls;
-    }
-
-    public void reload() {
-
-        rows.clear();
-
-        if (cls != null) {
-            Set<OWLDescription> directSupers = RestrictionUtils.getDirectRestrictionsOnClass(cls, mngr);
-            processOWLRestrictions(directSupers, false);
-
-            if (showInherited()) {
-                Set<OWLDescription> inheritedRestrs = RestrictionUtils.getInheritedRestrictionsOnClass(cls, mngr);
-                processOWLRestrictions(inheritedRestrs, true);
-            }
-
-            Collections.sort(rows);
-        }
+    public void setSubject(OWLClass subject) {
+        rowFactory.setSubject(subject);
         fireTableDataChanged();
     }
 
-    /**
-     * Removal of the restrictions in a single row of the table
-     * Warning - DO NOT USE THIS FOR MULTIPLE DELETES - as this will break undo
-     *
-     * @param row to delete
-     */
-    public void removeRestriction(CardinalityRow row) {
-        List<OWLOntologyChange> changes = row.getDeleteChanges();
-        if (row.getProperty() instanceof OWLObjectProperty && row.isClosed()) {
-            changes.addAll(closureUtils.removeFromClosure(Collections.singleton((OWLDescription) row.getFiller()),
-                                                          row.getSubject(), (OWLObjectProperty)row.getProperty()));
-        }
+    public OWLClass getSubject() {
+        return rowFactory.getSubject();
+    }
+
+    public void removeRows(Set<CardinalityRow> rows) {
+        List<OWLOntologyChange> changes = rowFactory.removeRestrictions(rows);
         mngr.applyChanges(changes);
     }
 
-    /**
-     * Atomic removal of restrictions and management of closure (must be done in a single transaction for undo)
-     *
-     * @param rows the rows to delete
-     */
-    public void removeRestrictions(Collection<CardinalityRow> rows) {
-
-        List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
-
-        Map<OWLProperty, Set<OWLDescription>> closureMap = new HashMap<OWLProperty, Set<OWLDescription>>();
-
-        for (CardinalityRow restr : rows) {
-            if (!restr.isReadOnly()) {
-                changes.addAll(restr.getDeleteChanges());
-
-                // can't reset closure using the current state of the ontology (as nothing has been deleted yet)
-                if (restr.isClosed()) {
-                    // generate a map of properties to fillers that should be removed
-                    Set<OWLDescription> fillers = closureMap.get(restr.getProperty());
-                    if (fillers == null) {
-                        fillers = new HashSet<OWLDescription>();
-                        closureMap.put(restr.getProperty(), fillers);
-                    }
-                    fillers.add((OWLDescription) restr.getFiller());
-                }
-            }
-        }
-
-        for (OWLProperty prop : closureMap.keySet()) {
-            if (prop instanceof OWLObjectProperty){
-                changes.addAll(closureUtils.removeFromClosure(closureMap.get(prop),
-                                                              getSubject(),
-                                                              (OWLObjectProperty)prop));
-            }
-        }
-        mngr.applyChanges(changes);
-    }
-
-    public CardinalityRow getRestriction(int row) {
-        return rows.get(row);
+    public CardinalityRow getRow(int row) {
+        return rowFactory.getRows().get(row);
     }
 
     public int getRow(CardinalityRow restr) {
-        return rows.indexOf(restr);
+        return rowFactory.getRows().indexOf(restr);
     }
 
     public int getRow(OWLRestriction restr) {
-        for (CardinalityRow row : rows) {
-            if (row.contains(restr)) {
-                return rows.indexOf(row);
+        List<CardinalityRow> rows = rowFactory.getRows();
+        for (int i=0; i<rows.size(); i++) {
+            if (rows.get(i).contains(restr)) {
+                return i;
             }
         }
         return -1;
     }
 
-//////////////////////////////////////////////////////////
-
-    private void processOWLRestrictions(Collection<OWLDescription> restrs, boolean readonly) {
-        for (OWLDescription restr : restrs) { // any restriction
-            CardinalityRow newRow = createRow(restr, readonly);
-            if (newRow != null) {
-                if (!mergeWithExistingRows(newRow)) {
-                    rows.add(newRow);
-                }
-            }
-        }
-    }
-
-    private CardinalityRow createRow(OWLDescription descr, boolean readonly) {
-        CardinalityRow row = null;
-        if ((RestrictionUtils.isNotSome(descr)) ||
-            ((descr instanceof OWLRestriction) && !(descr instanceof OWLObjectAllRestriction))) {
-
-            OWLProperty prop = RestrictionUtils.getProperty(descr);
-            OWLObject filler = RestrictionUtils.getOWLFiller(descr);
-            final boolean closed = closureUtils.isClosed(getSubject(), prop, filler, mngr);
-            row = new CardinalityRowImpl(getSubject(),
-                                         filler,
-                                         prop,
-                                         RestrictionUtils.getMinRelationships(descr),
-                                         RestrictionUtils.getMaxRelationships(descr),
-                                         closed,
-                                         mngr);
-            row.addRestriction(descr, readonly);
-            row.setModel(this);
-        }
-        return row;
-    }
-
-    private boolean mergeWithExistingRows(CardinalityRow newRow) {
-        boolean merged = false;
-        for (Iterator<CardinalityRow> j = rows.iterator(); j.hasNext() && !merged;) {
-            CardinalityRow cardiRow = j.next();
-            if (canMerge(cardiRow, newRow)) {
-                cardiRow.merge(newRow);
-                merged = true;
-            }
-        }
-        return merged;
-    }
-
-    // Simple implementation - does not deal with subsumption of properties and fillers
-    protected boolean canMerge(CardinalityRow row1, CardinalityRow row2) {
-        return (row1.getProperty().equals(row2.getProperty())) &&
-               (row1.getFiller().equals(row2.getFiller()));
-    }
-
-//    /**
-//     * If:
-//     * - both the fillers are named classes
-//     * - the restriction is not an OWLAllValuesFrom
-//     * - the restricted property is an OWLObjectProperty
-//     * - the restriction has more specific cardinality than that which already exists
-//     */
-//    protected boolean canMerge(CardinalityRow row1, CardinalityRow row2) {
-//        boolean canMerge = false;
-//            if ((row1.getFiller() instanceof OWLClass) &&
-//                    (row2.getFiller() instanceof OWLClass)) {
-//                    if (row2.getMax() >= row1.getMax()) {
-//                        if (row2.getMax() <= row1.getMax()) {
-//                            if (specialisesCurrentFiller((OWLClass) newFiller)) {
-//                                // @@TODO test the property
-//                                canMerge = true;
-//                            }
-//                        }
-//                    }
-//                }
-//        return canMerge;
-//    }
-//
-//    private boolean specialisesCurrentFiller(OWLClass newValue, OWLClass oldValue) {
-//        return mngr.getOWLClassHierarchyProvider().getAncestors(newValue).contains(oldValue);
-//    }
-
-    private boolean showInherited() {
-        return CardinalityPreferences.getInstance().getBoolean(CardinalityPreferences.OPT_SHOW_INHERITED_RESTRS, true);
-    }
-
-    protected void finalize() throws Throwable {
-        mngr.removeOntologyChangeListener(cl);
-        super.finalize();
-    }
-
-/////////////////////////////////// AbstractTableModel implementation
+/////////////////////////////////// TableModel implementation
 
     public Class getColumnClass(int columnIndex) {
         return COL_CLASSES[columnIndex];
@@ -305,14 +127,11 @@ public class CardinalityTableModel extends AbstractTableModel {
         }
         return colNames[column];
     }
-
+    
     public Object getValueAt(int rowIndex, int columnIndex) {
         Object value = null;
-        CardinalityRow restr = rows.get(rowIndex);
+        CardinalityRow restr = rowFactory.getRows().get(rowIndex);
         switch (columnIndex) {
-//            case COL_AND:
-//                value = (rowIndex > 0) ? "AND" : "";
-//                break;
             case COL_MIN:
                 int min = restr.getMin();
                 value = (min < 0) ? "" : Integer.toString(min);
@@ -340,24 +159,28 @@ public class CardinalityTableModel extends AbstractTableModel {
     }
 
     public int getRowCount() {
-        return rows.size();
+        return rowFactory.getRows().size();
     }
 
     public boolean isCellEditable(int rowIndex, int columnIndex) {
         boolean result = true;
-        if (rows.get(rowIndex).isReadOnly()) {
+        if (rowFactory.getRows().get(rowIndex).isReadOnly()) {
             result = false;
         }
         else {
             switch (columnIndex) {
-//                case COL_AND:
-//                    result = false;
-//                    break;
-                case COL_FILLER: // drop through
+                case COL_MIN: // fallthrough
+                case COL_MAX:
+                    // cannot edit the min, max of 1 if this is a hasValue restriction
+                    if (getRow(rowIndex).getFiller() instanceof OWLIndividual ||
+                            getRow(rowIndex).getFiller() instanceof OWLConstant){
+                        result = false;
+                    }
+                    break;
                 case COL_CLOSED:
                     OWLProperty prop = (OWLProperty) getValueAt(rowIndex, CardinalityTableModel.COL_PROP);
                     if (prop instanceof OWLDataProperty ||
-                        getRestriction(rowIndex).getMax() == 0) {
+                        getRow(rowIndex).getMax() == 0) {
                         result = false;
                     }
                     break;
@@ -367,8 +190,9 @@ public class CardinalityTableModel extends AbstractTableModel {
     }
 
     public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+        System.out.println("setvalue = " + aValue);
         List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
-        CardinalityRow restr = rows.get(rowIndex);
+        CardinalityRow restr = rowFactory.getRows().get(rowIndex);
         switch (columnIndex) {
             case COL_MIN:
                 try {
@@ -387,7 +211,7 @@ public class CardinalityTableModel extends AbstractTableModel {
                 }
                 break;
             case COL_PROP:
-                restr.setProperty((OWLObjectProperty) aValue);
+                restr.setProperty((OWLProperty) aValue);
                 break;
             case COL_FILLER:
                 restr.setFiller((OWLObject) aValue);
@@ -400,18 +224,40 @@ public class CardinalityTableModel extends AbstractTableModel {
         changes.addAll(restr.getChanges());
 
         mngr.applyChanges(changes);
-
-        fireTableDataChanged();
     }
 
-    public Set<OWLDescription> getFillers(OWLObjectProperty property) {
-        Set<OWLDescription> fillers = new HashSet<OWLDescription>();
-        for (CardinalityRow row : rows) {
-            if (row.getProperty().equals(property) &&
-                row.getFiller() instanceof OWLDescription) {
-                fillers.add((OWLDescription) row.getFiller());
+    private void handleOntologiesChanged(List<? extends OWLOntologyChange> list) {
+        boolean reload = false;
+        for (OWLOntologyChange ontologyChange : list){
+            OWLDescription subclass = null;
+            OWLDescription superclass = null;
+            OWLAxiom axiom = ontologyChange.getAxiom();
+            if (axiom instanceof OWLSubClassAxiom) {
+                subclass = ((OWLSubClassAxiom) axiom).getSubClass();
+                superclass = ((OWLSubClassAxiom) axiom).getSuperClass();
+            }
+
+            if (subclass != null) {
+                if ((subclass.equals(getSubject())) ||
+                    (mngr.getOWLClassHierarchyProvider().getAncestors(getSubject()).contains(subclass))) {
+                    if (superclass instanceof OWLClass ||
+                        superclass instanceof OWLRestriction ||
+                        superclass instanceof OWLObjectComplementOf) {
+                        reload = true;
+                    }
+                }
             }
         }
-        return fillers;
+        if (reload){
+            rowFactory.reload();
+            fireTableDataChanged();
+        }
+    }
+
+//////////////////////////////////////////////////////////
+
+
+    public void dispose() {
+        mngr.removeOntologyChangeListener(cl);
     }
 }

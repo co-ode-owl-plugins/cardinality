@@ -37,9 +37,9 @@ import org.protege.editor.core.prefs.PreferencesManager;
  * Date: Aug 30, 2006<br><br>
  * <p/>
  */
-public class CardinalityPreferences {
+public class CardiPrefs {
 
-    private static CardinalityPreferences instance;
+    private static CardiPrefs instance;
 
     private Preferences prefs;
 
@@ -52,12 +52,12 @@ public class CardinalityPreferences {
 
     public static Preferences getInstance() {
         if (instance == null) {
-            instance = new CardinalityPreferences();
+            instance = new CardiPrefs();
         }
         return instance.prefs;
     }
 
-    private CardinalityPreferences() {
+    private CardiPrefs() {
         prefs = PreferencesManager.getInstance().getPreferencesForSet("org.coode.cardinality",
                                                                       CardinalityView.class);
     }

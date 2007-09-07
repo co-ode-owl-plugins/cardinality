@@ -75,6 +75,6 @@ public class DeleteRowAction extends OWLSelectionViewAction {
     }
 
     public void actionPerformed(ActionEvent actionEvent) {
-        table.getModel().removeRestrictions(table.getSelection());
+        table.getModel().removeRows(table.getSelection());
     }
 }
