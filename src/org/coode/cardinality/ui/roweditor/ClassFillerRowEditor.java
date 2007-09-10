@@ -55,7 +55,7 @@ public class ClassFillerRowEditor extends CardinalityRowEditorPanel {
         objectPropertySelectorPanel.setBorder(ComponentFactory.createTitledBorder("Restricted properties"));
 
         classSelectorPanel = new OWLClassSelectorPanel(eKit);
-        classSelectorPanel.setBorder(ComponentFactory.createTitledBorder("filler"));
+        classSelectorPanel.setBorder(ComponentFactory.createTitledBorder("Filler"));
 
         setLayout(new BorderLayout());
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, false);

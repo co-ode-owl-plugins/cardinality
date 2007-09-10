@@ -59,7 +59,7 @@ public class DataConstantFillerRowEditor extends CardinalityRowEditorPanel {
 
         setLayout(new BorderLayout());
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, false);
-        splitPane.setResizeWeight(0.5);
+        splitPane.setResizeWeight(0.3);
         splitPane.setLeftComponent(dataPropertySelectorPanel);
         splitPane.setRightComponent(constantEditor);
         add(splitPane, BorderLayout.CENTER);

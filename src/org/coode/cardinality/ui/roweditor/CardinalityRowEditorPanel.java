@@ -56,6 +56,25 @@ public abstract class CardinalityRowEditorPanel extends JPanel {
     private JSpinner minCardinalitySpinner;
     private JSpinner maxCardinalitySpinner;
 
+    // keep the min and max in sequence
+    private ChangeListener minSpinnerChangeListener = new ChangeListener(){
+        public void stateChanged(ChangeEvent changeEvent) {
+            final int min = (Integer) minCardinalitySpinner.getValue();
+            if (min > (Integer) maxCardinalitySpinner.getValue()){
+                maxCardinalitySpinner.setValue(min);
+            }
+        }
+    };
+
+    private ChangeListener maxSpinnerChangeListener = new ChangeListener(){
+        public void stateChanged(ChangeEvent changeEvent) {
+            final int max = (Integer) maxCardinalitySpinner.getValue();
+            if (max < (Integer) minCardinalitySpinner.getValue()){
+                minCardinalitySpinner.setValue(max);
+            }
+        }
+    };
+
     public CardinalityRowEditorPanel(OWLEditorKit eKit, OWLClass subject) {
 
         this.eKit = eKit;
@@ -116,16 +135,10 @@ public abstract class CardinalityRowEditorPanel extends JPanel {
             }
         });
         minCardinalitySpinner = new JSpinner(new SpinnerNumberModel(1, 0, null, 1));
-        minCardinalitySpinner.addChangeListener(new ChangeListener(){
-            public void stateChanged(ChangeEvent changeEvent) {
-                final int min = (Integer) minCardinalitySpinner.getValue();
-                if (min > (Integer) maxCardinalitySpinner.getValue()){
-                    maxCardinalitySpinner.setValue(min);
-                }
-            }
-        });
+        minCardinalitySpinner.addChangeListener(minSpinnerChangeListener);
 
         maxCardinalitySpinner = new JSpinner(new SpinnerNumberModel(1, 0, null, 1));
+        maxCardinalitySpinner.addChangeListener(maxSpinnerChangeListener);
         maxCardinalitySpinner.setEnabled(false);
 
         JComponent minCardinalitySpinnerEditor = minCardinalitySpinner.getEditor();

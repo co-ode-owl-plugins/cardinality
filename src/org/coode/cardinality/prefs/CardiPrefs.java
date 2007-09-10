@@ -48,6 +48,8 @@ public class CardiPrefs {
     public static final String OPT_DOUBLE_CLICK_NAV = "opt_double_click_nav";
     public static final String OPT_EDIT_DT_PROPERTIES = "opt_edit_dt_properties";
     public static final String OPT_CREATE_PROPERTIES_INLINE = "opt_create_properties_inline";
+    public static final String FILLER_COL_WIDTH = "filler_col_width";
+    public static final String PROP_COL_WIDTH = "prop_col_width";
 
 
     public static Preferences getInstance() {

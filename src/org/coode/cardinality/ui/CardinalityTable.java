@@ -2,7 +2,7 @@ package org.coode.cardinality.ui;
 
 import org.coode.cardinality.model.CardinalityRow;
 import org.coode.cardinality.model.CardinalityTableModel;
-import org.coode.cardinality.prefs.CardinalityProperties;
+import org.coode.cardinality.prefs.CardiPrefs;
 import org.coode.cardinality.ui.celleditor.DataTypeCombo;
 import org.coode.cardinality.ui.celleditor.OWLConstantCellEditor;
 import org.coode.cardinality.ui.celleditor.OWLDescriptionCellEditor;
@@ -60,7 +60,7 @@ import java.util.Set;
  */
 public class CardinalityTable extends BasicLinkedOWLObjectTable {
 
-    private static int[] colWidth;
+//    private static int[] colWidth;
 
     private DefaultTableCellRenderer defaultRen;
     private OWLCellRenderer entityRen;
@@ -103,10 +103,17 @@ public class CardinalityTable extends BasicLinkedOWLObjectTable {
         TableColumnModel tcm = getColumnModel();
         for (int i = getModel().getColumnCount() - 1; i >= 0; i--) {
             TableColumn tc = tcm.getColumn(i);
-            if (i != CardinalityTableModel.COL_FILLER &&
-                i != CardinalityTableModel.COL_PROP) {
-                tc.setMinWidth(Math.max(getColumnWidth(i), 30));
-                tc.setMaxWidth(getColumnWidth(i));
+            if (i == CardinalityTableModel.COL_FILLER){
+                int w = CardiPrefs.getInstance().getInt(CardiPrefs.FILLER_COL_WIDTH, 330);
+                tc.setPreferredWidth(w);
+            }
+            else if (i == CardinalityTableModel.COL_PROP){
+                int w = CardiPrefs.getInstance().getInt(CardiPrefs.PROP_COL_WIDTH, 130);
+                tc.setPreferredWidth(w);
+            }
+            else {
+                tc.setMinWidth(30);
+                tc.setMaxWidth(30);
             }
         }
     }
@@ -282,18 +289,6 @@ public class CardinalityTable extends BasicLinkedOWLObjectTable {
 
     protected boolean isHeaderVisible() {
         return true;
-    }
-
-    private int getColumnWidth(int index) {
-        if (colWidth == null) {
-            int columnCount = getModel().getColumnCount();
-            colWidth = new int[columnCount];
-            for (int i = 0; i < columnCount; i++) {
-                String value = CardinalityProperties.getInstance().getProperty("col.width." + index);
-                colWidth[i] = Integer.parseInt(value);
-            }
-        }
-        return colWidth[index];
     }
 
     public void dispose() {

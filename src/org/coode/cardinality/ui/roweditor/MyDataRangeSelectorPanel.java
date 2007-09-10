@@ -2,6 +2,7 @@ package org.coode.cardinality.ui.roweditor;
 
 import org.protege.editor.core.ui.util.ComponentFactory;
 import org.protege.editor.owl.OWLEditorKit;
+import org.protege.editor.owl.ui.OWLObjectComparator;
 import org.protege.editor.owl.ui.list.OWLObjectList;
 import org.semanticweb.owl.model.OWLDataFactory;
 import org.semanticweb.owl.model.OWLDataType;
@@ -11,6 +12,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collections;
 /*
 * Copyright (C) 2007, University of Manchester
 *
@@ -53,16 +55,28 @@ public class MyDataRangeSelectorPanel extends JPanel {
     }
 
     private void createUI() {
-        setLayout(new BorderLayout());
+        setLayout(new BorderLayout(20, 20));
+
+        final JToolBar toolBar = new JToolBar();
+        toolBar.setOpaque(false);
+        toolBar.setFloatable(false);
+        toolBar.setBorderPainted(false);
+        toolBar.setBorder(null);        
+        add(toolBar, BorderLayout.NORTH);
+
         list = new OWLObjectList(owlEditorKit);
-        add(ComponentFactory.createScrollPane(list));
+
         // Add the built in datatypes
+        OWLDataFactory df = owlEditorKit.getOWLModelManager().getOWLDataFactory();
         java.util.List<OWLDataType> builtInDataTypes = new ArrayList<OWLDataType>();
         for (URI uri : XSDVocabulary.ALL_DATATYPES) {
-            OWLDataFactory factory = owlEditorKit.getOWLModelManager().getOWLDataFactory();
-            builtInDataTypes.add(factory.getOWLDataType(uri));
+            builtInDataTypes.add(df.getOWLDataType(uri));
         }
+        Collections.sort(builtInDataTypes, new OWLObjectComparator(owlEditorKit.getOWLModelManager()));
         list.setListData(builtInDataTypes.toArray());
+        list.setSelectedIndex(0);
+
+        add(ComponentFactory.createScrollPane(list), BorderLayout.CENTER);
     }
 
     public OWLDataType getSelectedDataType(){

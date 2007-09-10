@@ -3,12 +3,14 @@ package org.coode.cardinality.ui.roweditor;
 import org.protege.editor.core.ui.util.ComponentFactory;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.ui.selector.OWLDataPropertySelectorPanel;
-import org.semanticweb.owl.model.OWLClass;
-import org.semanticweb.owl.model.OWLObject;
-import org.semanticweb.owl.model.OWLProperty;
+import org.semanticweb.owl.model.*;
+import org.semanticweb.owl.vocab.OWLRestrictedDataRangeFacetVocabulary;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 /*
 * Copyright (C) 2007, University of Manchester
 *
@@ -47,6 +49,8 @@ public class DataRangeFillerRowEditor extends CardinalityRowEditorPanel {
 
     private MyDataRangeSelectorPanel rangeSelectorPanel;
 
+    private DataRangeFacetPanel facetEditorPanel;
+
     public DataRangeFillerRowEditor(OWLEditorKit eKit, OWLClass subject) {
         super(eKit, subject);
 
@@ -54,13 +58,24 @@ public class DataRangeFillerRowEditor extends CardinalityRowEditorPanel {
         dataPropertySelectorPanel.setBorder(ComponentFactory.createTitledBorder("Restricted properties"));
 
         rangeSelectorPanel = new MyDataRangeSelectorPanel(eKit);
-        rangeSelectorPanel.setBorder(ComponentFactory.createTitledBorder("filler"));
+        rangeSelectorPanel.setBorder(ComponentFactory.createTitledBorder("Data Range"));
+        rangeSelectorPanel.setPreferredSize(new Dimension(200, rangeSelectorPanel.getPreferredSize().height));
+
+        facetEditorPanel = new DataRangeFacetPanel(eKit);
+        facetEditorPanel.setBorder(ComponentFactory.createTitledBorder("Facets"));
+        facetEditorPanel.setPreferredSize(new Dimension(200, facetEditorPanel.getPreferredSize().height));
+
+        JSplitPane rangeAndFacetSplitter = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, false);
+        rangeAndFacetSplitter.setResizeWeight(0.5);
+        rangeAndFacetSplitter.setLeftComponent(rangeSelectorPanel);
+        rangeAndFacetSplitter.setRightComponent(facetEditorPanel);
+        rangeAndFacetSplitter.setBorder(BorderFactory.createEmptyBorder());
 
         setLayout(new BorderLayout());
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, false);
-        splitPane.setResizeWeight(0.5);
+        splitPane.setResizeWeight(0.3);
         splitPane.setLeftComponent(dataPropertySelectorPanel);
-        splitPane.setRightComponent(rangeSelectorPanel);
+        splitPane.setRightComponent(rangeAndFacetSplitter);
         add(splitPane, BorderLayout.CENTER);
         splitPane.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
 
@@ -68,7 +83,23 @@ public class DataRangeFillerRowEditor extends CardinalityRowEditorPanel {
     }
 
     protected OWLObject getSelectedFiller() {
-        return rangeSelectorPanel.getSelectedDataType();
+        OWLDataType baseType = rangeSelectorPanel.getSelectedDataType();
+
+        Map<OWLRestrictedDataRangeFacetVocabulary, OWLTypedConstant> facetMap =
+                facetEditorPanel.getFacetValueMap(baseType);
+        OWLDataFactory df = getOWLEditorKit().getOWLModelManager().getOWLDataFactory();
+        Set<OWLDataRangeFacetRestriction> facetRestrs = new HashSet<OWLDataRangeFacetRestriction>();
+
+        for (OWLRestrictedDataRangeFacetVocabulary facet : facetMap.keySet()){
+            facetRestrs.add(df.getOWLDataRangeFacetRestriction(facet, facetMap.get(facet)));
+        }
+
+        if (facetRestrs.isEmpty()){
+            return baseType;
+        }
+        else{
+            return df.getOWLDataRangeRestriction(baseType, facetRestrs);
+        }
     }
 
     protected OWLProperty getSelectedProperty() {

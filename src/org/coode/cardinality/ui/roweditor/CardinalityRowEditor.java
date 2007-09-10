@@ -6,6 +6,8 @@ import org.semanticweb.owl.model.OWLClass;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 /*
@@ -59,9 +61,14 @@ public class CardinalityRowEditor extends JPanel {
 
         tabbedPane = new JTabbedPane();
         tabbedPane.setFocusable(false);
-        for (String editorName : editors.keySet()){
+
+        final java.util.List<String> editorNames = new ArrayList<String>(editors.keySet());
+        Collections.sort(editorNames);
+        for (String editorName : editorNames){
             tabbedPane.add(editorName, editors.get(editorName));
         }
+        tabbedPane.setSelectedComponent(editors.get("Class"));
+        
         add(tabbedPane, BorderLayout.CENTER);
     }
 
