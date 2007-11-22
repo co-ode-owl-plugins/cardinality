@@ -1,5 +1,5 @@
-<plugin version="1.0.5.CardinalityView">
-	<download url="http://co-ode-owl-plugins.googlecode.com/files/org.coode.cardinality.zip"/>
+<plugin version="1.0.6.CardinalityView">
+	<download url="http://co-ode-owl-plugins.googlecode.com/files/org.coode.cardinality_1_0_6.zip"/>
  	<website url="http://www.co-ode.org/downloads/protege-x/plugins.php"/>
 	<readme url="http://www.co-ode.org/downloads/protege-x/readme.txt"/>
 </plugin>

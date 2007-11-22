@@ -40,9 +40,9 @@ import java.util.Properties;
  */
 public class CardinalityProperties extends Properties {
 
+    private static final String PROPS_FILENAME = "resources/cardinality.properties";
+    
     private static CardinalityProperties instance;
-    private static final String PROPS_FILENAME = "cardinality.properties";
-
 
     public static CardinalityProperties getInstance() {
         if (instance == null) {
