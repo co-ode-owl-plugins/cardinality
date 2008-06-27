@@ -118,7 +118,7 @@ public class OWLDescriptionCellEditor extends AbstractCellEditor implements Tabl
 
         OWLDescription desc = (OWLDescription) value;
         if (desc != null) {
-            owlDescriptionEditor.setText(owlModelManager.getOWLObjectRenderer().render(desc, owlModelManager.getOWLEntityRenderer()));
+            owlDescriptionEditor.setText(owlModelManager.getRendering(desc));
         }
         else {
             owlDescriptionEditor.setText("");
