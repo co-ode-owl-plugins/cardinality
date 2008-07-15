@@ -3,7 +3,6 @@ package org.coode.cardinality.model;
 import org.coode.cardinality.util.ClosureUtils;
 import org.coode.cardinality.util.RestrictionUtils;
 import org.protege.editor.owl.model.OWLModelManager;
-import org.protege.editor.owl.ui.OWLObjectComparator;
 import org.semanticweb.owl.model.*;
 
 import javax.swing.*;
@@ -68,7 +67,7 @@ public class CardinalityRowImpl implements CardinalityRow {
 
     private CardinalityRowFactory factory;
 
-    protected final OWLObjectComparator<OWLObject> comparator;
+    protected final Comparator<OWLObject> comparator;
 
     private boolean changed = false;
 
@@ -87,7 +86,7 @@ public class CardinalityRowImpl implements CardinalityRow {
 
         this.mngr = mngr;
         closureUtils = new ClosureUtils(mngr);
-        this.comparator = new OWLObjectComparator<OWLObject>(mngr);
+        this.comparator = mngr.getOWLObjectComparator();
     }
 
     public void setFactory(CardinalityRowFactory factory) {

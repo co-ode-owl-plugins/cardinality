@@ -2,7 +2,6 @@ package org.coode.cardinality.ui.roweditor;
 
 import org.protege.editor.core.ui.util.ComponentFactory;
 import org.protege.editor.owl.OWLEditorKit;
-import org.protege.editor.owl.ui.OWLObjectComparator;
 import org.protege.editor.owl.ui.list.OWLObjectList;
 import org.semanticweb.owl.model.OWLDataFactory;
 import org.semanticweb.owl.model.OWLDataType;
@@ -72,7 +71,7 @@ public class MyDataRangeSelectorPanel extends JPanel {
         for (URI uri : XSDVocabulary.ALL_DATATYPES) {
             builtInDataTypes.add(df.getOWLDataType(uri));
         }
-        Collections.sort(builtInDataTypes, new OWLObjectComparator(owlEditorKit.getOWLModelManager()));
+        Collections.sort(builtInDataTypes, owlEditorKit.getOWLModelManager().getOWLObjectComparator());
         list.setListData(builtInDataTypes.toArray());
         list.setSelectedIndex(0);
 
