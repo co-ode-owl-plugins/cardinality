@@ -113,7 +113,7 @@ public class DataRangeFacetPanel extends JPanel {
     public Map<OWLRestrictedDataRangeFacetVocabulary, OWLTypedConstant> getFacetValueMap(OWLDataType baseType) {
         Map<OWLRestrictedDataRangeFacetVocabulary, OWLTypedConstant> results =
                 new HashMap<OWLRestrictedDataRangeFacetVocabulary, OWLTypedConstant>();
-        OWLDataFactory df = eKit.getOWLModelManager().getOWLDataFactory();
+        OWLDataFactory df = eKit.getModelManager().getOWLDataFactory();
         for (OWLRestrictedDataRangeFacetVocabulary facet : componentMap.keySet()){
             final String valueStr = componentMap.get(facet).getText();
             if (valueStr != null && !valueStr.equals("")){
@@ -125,7 +125,7 @@ public class DataRangeFacetPanel extends JPanel {
     }
 
     private OWLDataType getOWLDataTypeForFacet(OWLRestrictedDataRangeFacetVocabulary facet, OWLDataType baseType) {
-        OWLDataFactory df = eKit.getOWLModelManager().getOWLDataFactory();
+        OWLDataFactory df = eKit.getModelManager().getOWLDataFactory();
         switch(facet){
             case MIN_EXCLUSIVE:     // fallthrough
             case MIN_INCLUSIVE:     // fallthrough

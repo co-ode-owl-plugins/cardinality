@@ -66,12 +66,12 @@ public class MyDataRangeSelectorPanel extends JPanel {
         list = new OWLObjectList(owlEditorKit);
 
         // Add the built in datatypes
-        OWLDataFactory df = owlEditorKit.getOWLModelManager().getOWLDataFactory();
+        OWLDataFactory df = owlEditorKit.getModelManager().getOWLDataFactory();
         java.util.List<OWLDataType> builtInDataTypes = new ArrayList<OWLDataType>();
         for (URI uri : XSDVocabulary.ALL_DATATYPES) {
             builtInDataTypes.add(df.getOWLDataType(uri));
         }
-        Collections.sort(builtInDataTypes, owlEditorKit.getOWLModelManager().getOWLObjectComparator());
+        Collections.sort(builtInDataTypes, owlEditorKit.getModelManager().getOWLObjectComparator());
         list.setListData(builtInDataTypes.toArray());
         list.setSelectedIndex(0);
 

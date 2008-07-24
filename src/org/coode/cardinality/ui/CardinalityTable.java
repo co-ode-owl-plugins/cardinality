@@ -80,7 +80,7 @@ public class CardinalityTable extends BasicLinkedOWLObjectTable {
 
     public CardinalityTable(OWLEditorKit eKit) {
 
-        super(new CardinalityTableModel(eKit.getOWLModelManager()), eKit);
+        super(new CardinalityTableModel(eKit.getModelManager()), eKit);
 
         resizeColumns();
 
@@ -142,7 +142,7 @@ public class CardinalityTable extends BasicLinkedOWLObjectTable {
         defaultRen.setVerticalAlignment(SwingConstants.TOP);
         defaultRen.setHorizontalAlignment(SwingConstants.RIGHT);
 
-        closureRen = new ClosureCellRenderer(eKit.getOWLModelManager());
+        closureRen = new ClosureCellRenderer(eKit.getModelManager());
         closureRen.setVerticalAlignment(SwingConstants.TOP);
 
         setRowHeight(Math.max(getRowHeight(), closureRen.getPreferredSize().height));
@@ -203,7 +203,7 @@ public class CardinalityTable extends BasicLinkedOWLObjectTable {
             }
         };
 
-        dataConstantEditor = new OWLConstantCellEditor(new JTextField(), eKit.getOWLModelManager());
+        dataConstantEditor = new OWLConstantCellEditor(new JTextField(), eKit.getModelManager());
     }
 
     public CardinalityTableModel getModel() {

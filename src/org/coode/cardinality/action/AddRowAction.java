@@ -74,7 +74,7 @@ public class AddRowAction extends OWLSelectionViewAction {
         }
 
         if (editor.showDialog(table.getModel().getSubject()) == JOptionPane.OK_OPTION){
-            OWLModelManager mngr = eKit.getOWLModelManager();
+            OWLModelManager mngr = eKit.getModelManager();
             newRow = editor.createRow();
             if (newRow != null){
                 List<OWLOntologyChange> changes = CardinalityRowFactory.toOWL(newRow,

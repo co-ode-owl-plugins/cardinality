@@ -69,11 +69,11 @@ public class ClassFillerRowEditor extends CardinalityRowEditorPanel {
     }
 
     protected OWLObject getSelectedFiller() {
-        return classSelectorPanel.getSelectedClass();
+        return classSelectorPanel.getSelectedObject();
     }
 
     protected OWLProperty getSelectedProperty() {
-        return objectPropertySelectorPanel.getSelectedOWLObjectProperty();
+        return objectPropertySelectorPanel.getSelectedObject();
     }
 
     public void dispose() {

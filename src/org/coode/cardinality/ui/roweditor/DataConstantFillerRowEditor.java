@@ -71,7 +71,7 @@ public class DataConstantFillerRowEditor extends CardinalityRowEditorPanel {
     }
 
     protected OWLProperty getSelectedProperty() {
-        return dataPropertySelectorPanel.getSelectedDataProperty();
+        return dataPropertySelectorPanel.getSelectedObject();
     }
 
     public void dispose() {

@@ -50,7 +50,7 @@ public class DataTypeCombo extends JComboBox {
     public DataTypeCombo(OWLEditorKit eKit) {
         super();
 
-        mngr = eKit.getOWLModelManager();
+        mngr = eKit.getModelManager();
 
         setRenderer(new OWLCellRenderer(eKit));
 

@@ -76,7 +76,7 @@ public class CardinalityRowEditor extends JPanel {
         for (CardinalityRowEditorPanel editor : editors.values()){
             editor.setSubject(subject);
         }
-        return JOptionPane.showConfirmDialog(eKit.getOWLWorkspace().getTopLevelAncestor(),
+        return JOptionPane.showConfirmDialog(eKit.getWorkspace().getTopLevelAncestor(),
                                              this, "Create New Row", JOptionPane.OK_CANCEL_OPTION,
                                              JOptionPane.PLAIN_MESSAGE);
     }

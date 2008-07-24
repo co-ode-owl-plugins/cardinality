@@ -87,7 +87,7 @@ public class PropCombo extends JComboBox {
 
         this.type = type;
 
-        mngr = eKit.getOWLModelManager();
+        mngr = eKit.getModelManager();
 
         comp = new OWLEntityComparator<OWLProperty>(mngr);
 

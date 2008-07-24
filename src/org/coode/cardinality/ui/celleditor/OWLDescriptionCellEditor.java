@@ -3,9 +3,7 @@ package org.coode.cardinality.ui.celleditor;
 import org.apache.log4j.Logger;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.model.OWLModelManager;
-import org.protege.editor.owl.model.description.OWLDescriptionParser;
 import org.protege.editor.owl.ui.clsdescriptioneditor.ExpressionEditor;
-import org.protege.editor.owl.ui.clsdescriptioneditor.OWLDescriptionChecker;
 import org.semanticweb.owl.model.OWLDescription;
 import org.semanticweb.owl.model.OWLException;
 
@@ -54,15 +52,15 @@ public class OWLDescriptionCellEditor extends AbstractCellEditor implements Tabl
 
     private OWLModelManager owlModelManager;
 
-    private ExpressionEditor owlDescriptionEditor;
+    private ExpressionEditor<OWLDescription> owlDescriptionEditor;
 
     private boolean expandable;
 
     public static final int EXPANDABLE_ROW_HEIGHT = 45;
 
     public OWLDescriptionCellEditor(OWLEditorKit eKit) {
-        this.owlModelManager = eKit.getOWLModelManager();
-        owlDescriptionEditor = new ExpressionEditor<OWLDescription>(eKit, new OWLDescriptionChecker(eKit));
+        this.owlModelManager = eKit.getModelManager();
+        owlDescriptionEditor = new ExpressionEditor<OWLDescription>(eKit, owlModelManager.getOWLExpressionCheckerFactory().getOWLDescriptionChecker());
         owlDescriptionEditor.setOpaque(false);
         owlDescriptionEditor.addKeyListener(new KeyAdapter() {
             public void keyPressed(KeyEvent e) {
@@ -100,10 +98,9 @@ public class OWLDescriptionCellEditor extends AbstractCellEditor implements Tabl
     }
 
     public Object getCellEditorValue() {
-        OWLDescriptionParser parser = owlModelManager.getOWLDescriptionParser();
         OWLDescription descr = null;
         try {
-            descr = parser.createOWLDescription(owlDescriptionEditor.getText());
+            descr = owlDescriptionEditor.createObject();
         }
         catch (OWLException e) {
             Logger.getLogger(OWLDescriptionCellEditor.class).error(e.getMessage());

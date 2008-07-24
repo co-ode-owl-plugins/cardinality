@@ -100,7 +100,7 @@ public abstract class CardinalityRowEditorPanel extends JPanel {
                                                getMin(),
                                                getMax(),
                                                false,
-                                               getOWLEditorKit().getOWLModelManager());
+                                               getOWLEditorKit().getModelManager());
     }
 
     protected abstract OWLObject getSelectedFiller();

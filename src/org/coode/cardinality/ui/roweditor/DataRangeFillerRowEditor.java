@@ -87,7 +87,7 @@ public class DataRangeFillerRowEditor extends CardinalityRowEditorPanel {
 
         Map<OWLRestrictedDataRangeFacetVocabulary, OWLTypedConstant> facetMap =
                 facetEditorPanel.getFacetValueMap(baseType);
-        OWLDataFactory df = getOWLEditorKit().getOWLModelManager().getOWLDataFactory();
+        OWLDataFactory df = getOWLEditorKit().getModelManager().getOWLDataFactory();
         Set<OWLDataRangeFacetRestriction> facetRestrs = new HashSet<OWLDataRangeFacetRestriction>();
 
         for (OWLRestrictedDataRangeFacetVocabulary facet : facetMap.keySet()){
@@ -103,7 +103,7 @@ public class DataRangeFillerRowEditor extends CardinalityRowEditorPanel {
     }
 
     protected OWLProperty getSelectedProperty() {
-        return dataPropertySelectorPanel.getSelectedDataProperty();
+        return dataPropertySelectorPanel.getSelectedObject();
     }
 
     public void dispose() {
