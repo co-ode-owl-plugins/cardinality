@@ -1,17 +1,11 @@
 package org.coode.cardinality.ui.roweditor;
 
-import org.protege.editor.core.ui.util.ComponentFactory;
 import org.protege.editor.owl.OWLEditorKit;
-import org.protege.editor.owl.ui.list.OWLObjectList;
-import org.semanticweb.owl.model.OWLDataFactory;
+import org.protege.editor.owl.ui.selector.DataRangeSelectionPanel;
 import org.semanticweb.owl.model.OWLDataType;
-import org.semanticweb.owl.vocab.XSDVocabulary;
 
 import javax.swing.*;
 import java.awt.*;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.Collections;
 /*
 * Copyright (C) 2007, University of Manchester
 *
@@ -45,11 +39,13 @@ import java.util.Collections;
  */
 public class MyDataRangeSelectorPanel extends JPanel {
 
-    private OWLEditorKit owlEditorKit;
-    private OWLObjectList list;
+    private OWLEditorKit eKit;
 
-    public MyDataRangeSelectorPanel(OWLEditorKit owlEditorKit) {
-        this.owlEditorKit = owlEditorKit;
+    private DataRangeSelectionPanel selectorPanel;
+
+
+    public MyDataRangeSelectorPanel(OWLEditorKit eKit) {
+        this.eKit = eKit;
         createUI();
     }
 
@@ -63,22 +59,12 @@ public class MyDataRangeSelectorPanel extends JPanel {
         toolBar.setBorder(null);        
         add(toolBar, BorderLayout.NORTH);
 
-        list = new OWLObjectList(owlEditorKit);
+        selectorPanel = new DataRangeSelectionPanel(eKit);
 
-        // Add the built in datatypes
-        OWLDataFactory df = owlEditorKit.getModelManager().getOWLDataFactory();
-        java.util.List<OWLDataType> builtInDataTypes = new ArrayList<OWLDataType>();
-        for (URI uri : XSDVocabulary.ALL_DATATYPES) {
-            builtInDataTypes.add(df.getOWLDataType(uri));
-        }
-        Collections.sort(builtInDataTypes, owlEditorKit.getModelManager().getOWLObjectComparator());
-        list.setListData(builtInDataTypes.toArray());
-        list.setSelectedIndex(0);
-
-        add(ComponentFactory.createScrollPane(list), BorderLayout.CENTER);
+        add(selectorPanel, BorderLayout.CENTER);
     }
 
     public OWLDataType getSelectedDataType(){
-        return (OWLDataType)list.getSelectedValue();
+        return selectorPanel.getSelectedObject();
     }
 }

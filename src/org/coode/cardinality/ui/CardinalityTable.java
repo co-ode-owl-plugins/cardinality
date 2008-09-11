@@ -3,11 +3,11 @@ package org.coode.cardinality.ui;
 import org.coode.cardinality.model.CardinalityRow;
 import org.coode.cardinality.model.CardinalityTableModel;
 import org.coode.cardinality.prefs.CardiPrefs;
-import org.coode.cardinality.ui.celleditor.DataTypeCombo;
 import org.coode.cardinality.ui.celleditor.OWLConstantCellEditor;
 import org.coode.cardinality.ui.celleditor.OWLDescriptionCellEditor;
 import org.coode.cardinality.ui.celleditor.PropCombo;
 import org.protege.editor.owl.OWLEditorKit;
+import org.protege.editor.owl.ui.UIHelper;
 import org.protege.editor.owl.ui.renderer.OWLCellRenderer;
 import org.protege.editor.owl.ui.table.BasicLinkedOWLObjectTable;
 import org.semanticweb.owl.model.OWLConstant;
@@ -192,7 +192,7 @@ public class CardinalityTable extends BasicLinkedOWLObjectTable {
         ((OWLDescriptionCellEditor) descrFillerEditor).setExpandable(true);
 
         // datatype dropdown
-        dataFillerEditor = new DefaultCellEditor(new DataTypeCombo(eKit)){
+        dataFillerEditor = new DefaultCellEditor(new UIHelper(eKit).getDatatypeSelector()){
             public boolean isCellEditable(EventObject eventObject) {
                 if (eventObject instanceof MouseEvent) {
                     return ((MouseEvent) eventObject).getClickCount() >= 2;
