@@ -1,7 +1,7 @@
 package org.coode.cardinality.ui.roweditor;
 
 import org.protege.editor.owl.OWLEditorKit;
-import org.protege.editor.owl.ui.selector.DataRangeSelectionPanel;
+import org.protege.editor.owl.ui.selector.OWLDataTypeSelectorPanel;
 import org.semanticweb.owl.model.OWLDataType;
 
 import javax.swing.*;
@@ -41,7 +41,7 @@ public class MyDataRangeSelectorPanel extends JPanel {
 
     private OWLEditorKit eKit;
 
-    private DataRangeSelectionPanel selectorPanel;
+    private OWLDataTypeSelectorPanel selectorPanel;
 
 
     public MyDataRangeSelectorPanel(OWLEditorKit eKit) {
@@ -59,7 +59,7 @@ public class MyDataRangeSelectorPanel extends JPanel {
         toolBar.setBorder(null);        
         add(toolBar, BorderLayout.NORTH);
 
-        selectorPanel = new DataRangeSelectionPanel(eKit);
+        selectorPanel = new OWLDataTypeSelectorPanel(eKit);
 
         add(selectorPanel, BorderLayout.CENTER);
     }
