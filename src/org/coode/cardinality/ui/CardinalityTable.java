@@ -135,7 +135,6 @@ public class CardinalityTable extends BasicLinkedOWLObjectTable {
                 return c;
             }
         };
-        entityRen.setTransparent();
         entityRen.setHighlightKeywords(true);
 
         defaultRen = new DefaultTableCellRenderer();
