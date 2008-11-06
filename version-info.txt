@@ -1,0 +1,11 @@
+An experimental alternative to the conditions widget that shows restrictions in relation to their cardinality. If several different restrictions are along the same property with the same filler, it "merges" them into a single line to aid readability. It also provides hints as to whether a given set of restrictions are closed.
+
+
+Version info
+------------
+
+v1.0.8 (6th Nov 2008)
+- auto-update activated
+
+
+See also: http://www.co-ode.org/downloads/protege-x/plugins/#cardinality
