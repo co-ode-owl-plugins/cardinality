@@ -1,5 +1,6 @@
 <html>
 <body>
+<h2>Cardinality View</h2>
 <p>An experimental alternative to the conditions widget that shows restrictions in
  relation to their cardinality. If several different restrictions are along the
   same property with the same filler, it "merges" them into a single line to aid readability.
