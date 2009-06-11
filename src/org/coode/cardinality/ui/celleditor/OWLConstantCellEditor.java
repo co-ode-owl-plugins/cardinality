@@ -70,15 +70,17 @@ public class OWLConstantCellEditor extends DefaultCellEditor {
 
     public Object getCellEditorValue() {
         Object value = super.getCellEditorValue();
-        if (type != null){
-            value = mngr.getOWLDataFactory().getOWLTypedConstant((String)value, type);
-        }
-        else{
-            if (lang != null){
-                value = mngr.getOWLDataFactory().getOWLUntypedConstant((String)value, lang);
+        if (value != null){
+            if (type != null){
+                value = mngr.getOWLDataFactory().getOWLTypedConstant((String)value, type);
             }
             else{
-                value = mngr.getOWLDataFactory().getOWLUntypedConstant((String)value);
+                if (lang != null){
+                    value = mngr.getOWLDataFactory().getOWLUntypedConstant((String)value, lang);
+                }
+                else{
+                    value = mngr.getOWLDataFactory().getOWLUntypedConstant((String)value);
+                }
             }
         }
         return value;
