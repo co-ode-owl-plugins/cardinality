@@ -1,7 +1,7 @@
 package org.coode.cardinality.util;
 
-import org.semanticweb.owl.model.*;
-import org.semanticweb.owl.util.OWLObjectVisitorAdapter;
+import org.semanticweb.owlapi.model.*;
+import org.semanticweb.owlapi.util.OWLObjectVisitorAdapter;
 /*
 * Copyright (C) 2007, University of Manchester
 *
@@ -46,32 +46,32 @@ public class MaxCardinalityFinder extends OWLObjectVisitorAdapter {
         return max;
     }
 
-    public void visit(OWLObjectMaxCardinalityRestriction restr) {
+    public void visit(OWLObjectMaxCardinality restr) {
         max = restr.getCardinality();
     }
 
-    public void visit(OWLObjectExactCardinalityRestriction restr) {
+    public void visit(OWLObjectExactCardinality restr) {
         max = restr.getCardinality();
     }
 
-    public void visit(OWLObjectValueRestriction restr){
+    public void visit(OWLObjectHasValue restr){
         max = 1;
     }
 
-    public void visit(OWLDataMaxCardinalityRestriction restr) {
+    public void visit(OWLDataMaxCardinality restr) {
         max = restr.getCardinality();
     }
 
-    public void visit(OWLDataExactCardinalityRestriction restr) {
+    public void visit(OWLDataExactCardinality restr) {
         max = restr.getCardinality();
     }
 
-    public void visit(OWLDataValueRestriction owlDataValueRestriction) {
+    public void visit(OWLDataHasValue owlDataValueRestriction) {
         max = 1;
     }
 
     public void visit(OWLObjectComplementOf owlObjectComplementOf) {
-        if (owlObjectComplementOf.getOperand() instanceof OWLObjectSomeRestriction){
+        if (owlObjectComplementOf.getOperand() instanceof OWLObjectSomeValuesFrom){
             max = 0;
         }
         // @@TODO what about other complements? (eg of cardinality restrictions)

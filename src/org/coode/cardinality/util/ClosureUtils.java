@@ -1,7 +1,7 @@
 package org.coode.cardinality.util;
 
 import org.protege.editor.owl.model.OWLModelManager;
-import org.semanticweb.owl.model.*;
+import org.semanticweb.owlapi.model.*;
 
 import java.util.*;
 
@@ -31,18 +31,18 @@ public class ClosureUtils {
      * @param prop       will also search for universals on the superproperties of that given
      * @return all suitable restrictions for the given property or an empty list if none found
      */
-    public Collection<OWLObjectAllRestriction> getCandidateClosureAxioms(OWLClass namedClass, OWLProperty prop) {
-        Collection<OWLObjectAllRestriction> results = new ArrayList<OWLObjectAllRestriction>();
+    public Collection<OWLObjectAllValuesFrom> getCandidateClosureAxioms(OWLClass namedClass, OWLProperty prop) {
+        Collection<OWLObjectAllValuesFrom> results = new ArrayList<OWLObjectAllValuesFrom>();
 
         if (prop instanceof OWLObjectProperty){
-            Set<OWLObjectAllRestriction> candidates = RestrictionUtils.getUniversals(namedClass, mngr);
+            Set<OWLObjectAllValuesFrom> candidates = RestrictionUtils.getUniversals(namedClass, mngr);
 
-            for (OWLObjectAllRestriction restr : candidates) {
+            for (OWLObjectAllValuesFrom restr : candidates) {
                 OWLObjectPropertyExpression onProp = restr.getProperty();
                 if (onProp instanceof OWLObjectProperty &&
                     (onProp == prop || RestrictionUtils.isSubPropOf((OWLObjectProperty)prop,
                                                                     (OWLObjectProperty)onProp, mngr))) {
-                    OWLDescription filler = restr.getFiller();
+                    OWLClassExpression filler = restr.getFiller();
                     if (filler instanceof OWLClass) {
                         results.add(restr);
                     }
@@ -73,15 +73,15 @@ public class ClosureUtils {
      * @param filler     will search the fillers to find one that contains this resource
      * @return the first universal restriction that matches both property
      */
-    public OWLObjectAllRestriction getClosureAxiom(OWLClass namedClass,
+    public OWLObjectAllValuesFrom getClosureAxiom(OWLClass namedClass,
                                                    OWLObjectProperty prop,
                                                    OWLObject filler) {
-        Set<OWLObjectAllRestriction> candidates = RestrictionUtils.getUniversals(namedClass, mngr);
-        for (OWLObjectAllRestriction restr : candidates) {
+        Set<OWLObjectAllValuesFrom> candidates = RestrictionUtils.getUniversals(namedClass, mngr);
+        for (OWLObjectAllValuesFrom restr : candidates) {
             OWLObjectPropertyExpression onProp = restr.getProperty();
             if (onProp instanceof OWLObjectProperty &&
                 (onProp == prop || RestrictionUtils.isSubPropOf(prop, (OWLObjectProperty)onProp, mngr))) {
-                OWLDescription currentfiller = restr.getFiller();
+                OWLClassExpression currentfiller = restr.getFiller();
                 if (currentfiller instanceof OWLObjectUnionOf &&
                     ((OWLObjectUnionOf) currentfiller).getOperands().contains(filler)) {
                     return restr;
@@ -101,12 +101,12 @@ public class ClosureUtils {
         OWLAxiom newAxiom = null;
 
         if (closed) {
-            newAxiom = df.getOWLSubClassAxiom(cls, createClosureAxiom(objProp, cls));
+            newAxiom = df.getOWLSubClassOfAxiom(cls, createClosureAxiom(objProp, cls));
         }
 
         // get all existing closure axioms along this property
-        for (OWLObjectAllRestriction candidate : getCandidateClosureAxioms(cls, objProp)) {
-            oldAxioms.add(df.getOWLSubClassAxiom(cls, candidate));
+        for (OWLObjectAllValuesFrom candidate : getCandidateClosureAxioms(cls, objProp)) {
+            oldAxioms.add(df.getOWLSubClassOfAxiom(cls, candidate));
         }
 
         if (oldAxioms.isEmpty()){
@@ -129,28 +129,28 @@ public class ClosureUtils {
         return changes;
     }
 
-    public OWLObjectAllRestriction createClosureAxiom(OWLObjectProperty objProp, OWLClass cls) {
+    public OWLObjectAllValuesFrom createClosureAxiom(OWLObjectProperty objProp, OWLClass cls) {
 
-        CardinalityClosureFactory closureAxiomFactory = new CardinalityClosureFactory(objProp, mngr.getOWLDataFactory());
+        CardinalityClosureFactory closureAxiomFactory = new CardinalityClosureFactory(objProp, mngr.getOWLDataFactory(), mngr.getActiveOntologies());
 
-        for (OWLDescription desc : getSuperclasses(cls)) {
+        for (OWLClassExpression desc : getSuperclasses(cls)) {
             desc.accept(closureAxiomFactory);
         }
-        for (OWLDescription desc : getEquivalentClasses(cls)) {
+        for (OWLClassExpression desc : getEquivalentClasses(cls)) {
             desc.accept(closureAxiomFactory);
         }
-        return closureAxiomFactory.getClosureAxiom();
+        return closureAxiomFactory.getClosureRestriction();
     }
 
-    public OWLObjectAllRestriction createClosureAxiom(OWLObjectProperty objProp, Set<OWLDescription> fillers) {
-        OWLDescription filler;
+    public OWLObjectAllValuesFrom createClosureAxiom(OWLObjectProperty objProp, Set<OWLClassExpression> fillers) {
+        OWLClassExpression filler;
         if (fillers.size() > 1) {
             filler = mngr.getOWLDataFactory().getOWLObjectUnionOf(fillers);
         }
         else {
             filler = fillers.iterator().next();
         }
-        return mngr.getOWLDataFactory().getOWLObjectAllRestriction(objProp, filler);
+        return mngr.getOWLDataFactory().getOWLObjectAllValuesFrom(objProp, filler);
     }
 
     public boolean isClosed(OWLClass subject, OWLProperty property,
@@ -168,33 +168,33 @@ public class ClosureUtils {
      * @param property
      * @return
      */
-    public List<OWLOntologyChange> removeFromClosure(Set<OWLDescription> fillers,
+    public List<OWLOntologyChange> removeFromClosure(Set<OWLClassExpression> fillers,
                                                      OWLClass cls,
                                                      OWLObjectProperty property) {
 
         List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
         OWLDataFactory df = mngr.getOWLDataFactory();
 
-        for (OWLObjectAllRestriction candidate : getCandidateClosureAxioms(cls, property)) {
+        for (OWLObjectAllValuesFrom candidate : getCandidateClosureAxioms(cls, property)) {
 
-            OWLSubClassAxiom oldAxiom = df.getOWLSubClassAxiom(cls, candidate);
-            OWLSubClassAxiom newAxiom = null;
+            OWLSubClassOfAxiom oldAxiom = df.getOWLSubClassOfAxiom(cls, candidate);
+            OWLSubClassOfAxiom newAxiom = null;
 
-            OWLDescription descr = candidate.getFiller();
+            OWLClassExpression descr = candidate.getFiller();
             if (descr instanceof OWLObjectUnionOf) { // regenerate the closure without these fillers
 
-                Set<OWLDescription> operands = new HashSet<OWLDescription>(((OWLObjectUnionOf) descr).getOperands());
+                Set<OWLClassExpression> operands = new HashSet<OWLClassExpression>(((OWLObjectUnionOf) descr).getOperands());
                 operands.removeAll(fillers);
 
                 if (operands.size() == 1) {
-                    OWLRestriction restr = df.getOWLObjectAllRestriction(property, operands.iterator().next());
-                    newAxiom = df.getOWLSubClassAxiom(cls, restr);
+                    OWLRestriction restr = df.getOWLObjectAllValuesFrom(property, operands.iterator().next());
+                    newAxiom = df.getOWLSubClassOfAxiom(cls, restr);
 
                 }
                 else if (operands.size() > 1) {
-                    OWLDescription newUnion = df.getOWLObjectUnionOf(operands);
-                    OWLRestriction restr = df.getOWLObjectAllRestriction(property, newUnion);
-                    newAxiom = df.getOWLSubClassAxiom(cls, restr);
+                    OWLClassExpression newUnion = df.getOWLObjectUnionOf(operands);
+                    OWLRestriction restr = df.getOWLObjectAllValuesFrom(property, newUnion);
+                    newAxiom = df.getOWLSubClassOfAxiom(cls, restr);
                 }
             }
 
@@ -211,16 +211,16 @@ public class ClosureUtils {
         return changes;
     }
 
-    private Set<OWLDescription> getSuperclasses(OWLClass cls) {
-        final Set<OWLDescription> superclasses = new HashSet<OWLDescription>();
+    private Set<OWLClassExpression> getSuperclasses(OWLClass cls) {
+        final Set<OWLClassExpression> superclasses = new HashSet<OWLClassExpression>();
         for (OWLOntology ont : mngr.getActiveOntologies()){
             superclasses.addAll(cls.getSuperClasses(ont));
         }
         return superclasses;
     }
 
-    private Set<OWLDescription> getEquivalentClasses(OWLClass cls) {
-        final Set<OWLDescription> equivs = new HashSet<OWLDescription>();
+    private Set<OWLClassExpression> getEquivalentClasses(OWLClass cls) {
+        final Set<OWLClassExpression> equivs = new HashSet<OWLClassExpression>();
         for (OWLOntology ont : mngr.getActiveOntologies()){
             equivs.addAll(cls.getEquivalentClasses(ont));
         }

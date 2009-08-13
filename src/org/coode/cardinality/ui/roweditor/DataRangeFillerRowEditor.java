@@ -3,8 +3,8 @@ package org.coode.cardinality.ui.roweditor;
 import org.protege.editor.core.ui.util.ComponentFactory;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.ui.selector.OWLDataPropertySelectorPanel;
-import org.semanticweb.owl.model.*;
-import org.semanticweb.owl.vocab.OWLRestrictedDataRangeFacetVocabulary;
+import org.semanticweb.owlapi.model.*;
+import org.semanticweb.owlapi.vocab.OWLFacet;
 
 import javax.swing.*;
 import java.awt.*;
@@ -83,22 +83,21 @@ public class DataRangeFillerRowEditor extends CardinalityRowEditorPanel {
     }
 
     protected OWLObject getSelectedFiller() {
-        OWLDataType baseType = rangeSelectorPanel.getSelectedDataType();
+        OWLDatatype baseType = rangeSelectorPanel.getSelectedDataType();
 
-        Map<OWLRestrictedDataRangeFacetVocabulary, OWLTypedConstant> facetMap =
-                facetEditorPanel.getFacetValueMap(baseType);
+        Map<OWLFacet, OWLTypedLiteral> facetMap = facetEditorPanel.getFacetValueMap(baseType);
         OWLDataFactory df = getOWLEditorKit().getModelManager().getOWLDataFactory();
-        Set<OWLDataRangeFacetRestriction> facetRestrs = new HashSet<OWLDataRangeFacetRestriction>();
+        Set<OWLFacetRestriction> facetRestrs = new HashSet<OWLFacetRestriction>();
 
-        for (OWLRestrictedDataRangeFacetVocabulary facet : facetMap.keySet()){
-            facetRestrs.add(df.getOWLDataRangeFacetRestriction(facet, facetMap.get(facet)));
+        for (OWLFacet facet : facetMap.keySet()){
+            facetRestrs.add(df.getOWLFacetRestriction(facet, facetMap.get(facet)));
         }
 
         if (facetRestrs.isEmpty()){
             return baseType;
         }
         else{
-            return df.getOWLDataRangeRestriction(baseType, facetRestrs);
+            return df.getOWLDatatypeRestriction(baseType, facetRestrs);
         }
     }
 

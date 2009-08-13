@@ -3,7 +3,7 @@ package org.coode.cardinality.model;
 import org.coode.cardinality.util.ClosureUtils;
 import org.coode.cardinality.util.RestrictionUtils;
 import org.protege.editor.owl.model.OWLModelManager;
-import org.semanticweb.owl.model.*;
+import org.semanticweb.owlapi.model.*;
 
 import java.util.*;
 /*
@@ -80,27 +80,27 @@ public class CardinalityRowFactory {
         OWLProperty prop = row.getProperty();
 
         if (filler instanceof OWLIndividual){
-            OWLDescription minRestr = df.getOWLObjectValueRestriction((OWLObjectProperty)prop, (OWLIndividual)filler);
-            changes.add(new AddAxiom(ont, df.getOWLSubClassAxiom(subject, minRestr)));
+            OWLClassExpression minRestr = df.getOWLObjectHasValue((OWLObjectProperty)prop, (OWLIndividual)filler);
+            changes.add(new AddAxiom(ont, df.getOWLSubClassOfAxiom(subject, minRestr)));
         }
         else{
             if (min == 1) {
-                OWLDescription minRestr = df.getOWLObjectSomeRestriction((OWLObjectProperty)prop, (OWLDescription) filler);
-                changes.add(new AddAxiom(ont, df.getOWLSubClassAxiom(subject, minRestr)));
+                OWLClassExpression minRestr = df.getOWLObjectSomeValuesFrom((OWLObjectProperty)prop, (OWLClassExpression) filler);
+                changes.add(new AddAxiom(ont, df.getOWLSubClassOfAxiom(subject, minRestr)));
             }
             else if (min >= 0) {
-                OWLDescription minRestr = df.getOWLObjectMinCardinalityRestriction((OWLObjectProperty)prop, min, (OWLDescription) filler);
-                changes.add(new AddAxiom(ont, df.getOWLSubClassAxiom(subject, minRestr)));
+                OWLClassExpression minRestr = df.getOWLObjectMinCardinality(min, (OWLObjectProperty)prop, (OWLClassExpression) filler);
+                changes.add(new AddAxiom(ont, df.getOWLSubClassOfAxiom(subject, minRestr)));
             }
 
             if (max == 0) { // transform into a negated some restriction
-                OWLObjectSomeRestriction someRestr = df.getOWLObjectSomeRestriction((OWLObjectProperty)prop, (OWLDescription) filler);
-                OWLDescription maxRestr = df.getOWLObjectComplementOf(someRestr);
-                changes.add(new AddAxiom(ont, df.getOWLSubClassAxiom(subject, maxRestr)));
+                OWLObjectSomeValuesFrom someRestr = df.getOWLObjectSomeValuesFrom((OWLObjectProperty)prop, (OWLClassExpression) filler);
+                OWLClassExpression maxRestr = df.getOWLObjectComplementOf(someRestr);
+                changes.add(new AddAxiom(ont, df.getOWLSubClassOfAxiom(subject, maxRestr)));
             }
             else if (max >= 0) {
-                OWLDescription maxRestr = df.getOWLObjectMaxCardinalityRestriction((OWLObjectProperty)prop, max, (OWLDescription) filler);
-                changes.add(new AddAxiom(ont, df.getOWLSubClassAxiom(subject, maxRestr)));
+                OWLClassExpression maxRestr = df.getOWLObjectMaxCardinality(max, (OWLObjectProperty)prop, (OWLClassExpression) filler);
+                changes.add(new AddAxiom(ont, df.getOWLSubClassOfAxiom(subject, maxRestr)));
             }
         }
         return changes;
@@ -115,28 +115,28 @@ public class CardinalityRowFactory {
         OWLObject filler = row.getFiller();
         OWLProperty prop = row.getProperty();
 
-        if (filler instanceof OWLConstant){
-            OWLDescription minRestr = df.getOWLDataValueRestriction((OWLDataProperty)prop, (OWLConstant)filler);
-            changes.add(new AddAxiom(ont, df.getOWLSubClassAxiom(subject, minRestr)));
+        if (filler instanceof OWLLiteral){
+            OWLClassExpression minRestr = df.getOWLDataHasValue((OWLDataProperty)prop, (OWLLiteral)filler);
+            changes.add(new AddAxiom(ont, df.getOWLSubClassOfAxiom(subject, minRestr)));
         }
         else{
             if (min == 1) {
-                OWLDescription minRestr = df.getOWLDataSomeRestriction((OWLDataProperty)prop, (OWLDataRange)filler);
-                changes.add(new AddAxiom(ont, df.getOWLSubClassAxiom(subject, minRestr)));
+                OWLClassExpression minRestr = df.getOWLDataSomeValuesFrom((OWLDataProperty)prop, (OWLDataRange)filler);
+                changes.add(new AddAxiom(ont, df.getOWLSubClassOfAxiom(subject, minRestr)));
             }
             else if (min >= 0) {
-                OWLDescription minRestr = df.getOWLDataMinCardinalityRestriction((OWLDataProperty)prop, min, (OWLDataRange) filler);
-                changes.add(new AddAxiom(ont, df.getOWLSubClassAxiom(subject, minRestr)));
+                OWLClassExpression minRestr = df.getOWLDataMinCardinality(min, (OWLDataProperty)prop, (OWLDataRange) filler);
+                changes.add(new AddAxiom(ont, df.getOWLSubClassOfAxiom(subject, minRestr)));
             }
 
             if (max == 0) { // transform into a negated some restriction
-                OWLDataSomeRestriction someRestr = df.getOWLDataSomeRestriction((OWLDataProperty)prop, (OWLDataRange) filler);
-                OWLDescription maxRestr = df.getOWLObjectComplementOf(someRestr);
-                changes.add(new AddAxiom(ont, df.getOWLSubClassAxiom(subject, maxRestr)));
+                OWLDataSomeValuesFrom someRestr = df.getOWLDataSomeValuesFrom((OWLDataProperty)prop, (OWLDataRange) filler);
+                OWLClassExpression maxRestr = df.getOWLObjectComplementOf(someRestr);
+                changes.add(new AddAxiom(ont, df.getOWLSubClassOfAxiom(subject, maxRestr)));
             }
             else if (max >= 0) {
-                OWLDescription maxRestr = df.getOWLDataMaxCardinalityRestriction((OWLDataProperty)prop, max, (OWLDataRange) filler);
-                changes.add(new AddAxiom(ont, df.getOWLSubClassAxiom(subject, maxRestr)));
+                OWLClassExpression maxRestr = df.getOWLDataMaxCardinality(max, (OWLDataProperty)prop, (OWLDataRange) filler);
+                changes.add(new AddAxiom(ont, df.getOWLSubClassOfAxiom(subject, maxRestr)));
             }
         }
         return changes;
@@ -163,11 +163,11 @@ public class CardinalityRowFactory {
         rows.clear();
 
         if (cls != null) {
-            Set<OWLDescription> directSupers = RestrictionUtils.getDirectRestrictionsOnClass(cls, mngr);
+            Set<OWLClassExpression> directSupers = RestrictionUtils.getDirectRestrictionsOnClass(cls, mngr);
             addOWLRestrictions(directSupers, false);
 
             if (showInherited) {
-                Set<OWLDescription> inheritedRestrs = RestrictionUtils.getInheritedRestrictionsOnClass(cls, mngr);
+                Set<OWLClassExpression> inheritedRestrs = RestrictionUtils.getInheritedRestrictionsOnClass(cls, mngr);
                 addOWLRestrictions(inheritedRestrs, true);
             }
         }
@@ -175,8 +175,8 @@ public class CardinalityRowFactory {
         Collections.sort(rows);
     }
 
-    public void addOWLRestrictions(Collection<OWLDescription> restrs, boolean readonly) {
-        for (OWLDescription restr : restrs) { // any restriction
+    public void addOWLRestrictions(Collection<OWLClassExpression> restrs, boolean readonly) {
+        for (OWLClassExpression restr : restrs) { // any restriction
             CardinalityRow newRow = createRow(restr, readonly);
             if (newRow != null) {
                 if (!mergeWithExistingRows(newRow)) {
@@ -195,7 +195,7 @@ public class CardinalityRowFactory {
 
         List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
 
-        Map<OWLProperty, Set<OWLDescription>> closureMap = new HashMap<OWLProperty, Set<OWLDescription>>();
+        Map<OWLProperty, Set<OWLClassExpression>> closureMap = new HashMap<OWLProperty, Set<OWLClassExpression>>();
 
         for (CardinalityRow restr : rows) {
             if (!restr.isReadOnly()) {
@@ -204,12 +204,12 @@ public class CardinalityRowFactory {
                 // can't reset closure using the current state of the ontology (as nothing has been deleted yet)
                 if (restr.isClosed()) {
                     // generate a map of properties to fillers that should be removed
-                    Set<OWLDescription> fillers = closureMap.get(restr.getProperty());
+                    Set<OWLClassExpression> fillers = closureMap.get(restr.getProperty());
                     if (fillers == null) {
-                        fillers = new HashSet<OWLDescription>();
+                        fillers = new HashSet<OWLClassExpression>();
                         closureMap.put(restr.getProperty(), fillers);
                     }
-                    fillers.add((OWLDescription) restr.getFiller());
+                    fillers.add((OWLClassExpression) restr.getFiller());
                 }
             }
         }
@@ -228,10 +228,10 @@ public class CardinalityRowFactory {
         return Collections.unmodifiableList(rows);
     }
 
-    private CardinalityRow createRow(OWLDescription descr, boolean readonly) {
+    private CardinalityRow createRow(OWLClassExpression descr, boolean readonly) {
         CardinalityRow row = null;
         if ((RestrictionUtils.isNotSome(descr)) ||
-            ((descr instanceof OWLRestriction) && !(descr instanceof OWLObjectAllRestriction))) {
+            ((descr instanceof OWLRestriction) && !(descr instanceof OWLObjectAllValuesFrom))) {
 
             OWLProperty prop = RestrictionUtils.getProperty(descr);
             OWLObject filler = RestrictionUtils.getOWLFiller(descr);
@@ -267,12 +267,12 @@ public class CardinalityRowFactory {
                (row1.getFiller().equals(row2.getFiller()));
     }
 
-    public Set<OWLDescription> getFillers(OWLObjectProperty property) {
-        Set<OWLDescription> fillers = new HashSet<OWLDescription>();
+    public Set<OWLClassExpression> getFillers(OWLObjectProperty property) {
+        Set<OWLClassExpression> fillers = new HashSet<OWLClassExpression>();
         for (CardinalityRow row : rows) {
             if (row.getProperty().equals(property) &&
-                row.getFiller() instanceof OWLDescription) {
-                fillers.add((OWLDescription) row.getFiller());
+                row.getFiller() instanceof OWLClassExpression) {
+                fillers.add((OWLClassExpression) row.getFiller());
             }
         }
         return fillers;

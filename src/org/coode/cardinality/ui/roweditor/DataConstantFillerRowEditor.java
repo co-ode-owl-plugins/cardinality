@@ -2,11 +2,11 @@ package org.coode.cardinality.ui.roweditor;
 
 import org.protege.editor.core.ui.util.ComponentFactory;
 import org.protege.editor.owl.OWLEditorKit;
-import org.protege.editor.owl.ui.frame.OWLConstantEditor;
+import org.protege.editor.owl.ui.editor.OWLConstantEditor;
 import org.protege.editor.owl.ui.selector.OWLDataPropertySelectorPanel;
-import org.semanticweb.owl.model.OWLClass;
-import org.semanticweb.owl.model.OWLObject;
-import org.semanticweb.owl.model.OWLProperty;
+import org.semanticweb.owlapi.model.OWLClass;
+import org.semanticweb.owlapi.model.OWLObject;
+import org.semanticweb.owlapi.model.OWLProperty;
 
 import javax.swing.*;
 import java.awt.*;
@@ -67,7 +67,7 @@ public class DataConstantFillerRowEditor extends CardinalityRowEditorPanel {
     }
 
     protected OWLObject getSelectedFiller() {
-        return constantEditor.getValue();
+        return constantEditor.getEditedObject();
     }
 
     protected OWLProperty getSelectedProperty() {

@@ -4,8 +4,9 @@ import org.apache.log4j.Logger;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.model.OWLModelManager;
 import org.protege.editor.owl.ui.clsdescriptioneditor.ExpressionEditor;
-import org.semanticweb.owl.model.OWLDescription;
-import org.semanticweb.owl.model.OWLException;
+import org.protege.editor.owl.ui.clsdescriptioneditor.OWLExpressionCheckerFactory;
+import org.semanticweb.owlapi.model.OWLClassExpression;
+import org.semanticweb.owlapi.model.OWLException;
 
 import javax.swing.*;
 import javax.swing.table.TableCellEditor;
@@ -48,19 +49,21 @@ import java.util.EventObject;
  * Date: Aug 30, 2006<br><br>
  * <p/>
  */
-public class OWLDescriptionCellEditor extends AbstractCellEditor implements TableCellEditor {
+public class OWLClassExpressionCellEditor extends AbstractCellEditor implements TableCellEditor {
 
     private OWLModelManager owlModelManager;
 
-    private ExpressionEditor<OWLDescription> owlDescriptionEditor;
+    private ExpressionEditor<OWLClassExpression> owlDescriptionEditor;
 
     private boolean expandable;
 
     public static final int EXPANDABLE_ROW_HEIGHT = 45;
 
-    public OWLDescriptionCellEditor(OWLEditorKit eKit) {
-        this.owlModelManager = eKit.getModelManager();
-        owlDescriptionEditor = new ExpressionEditor<OWLDescription>(eKit, owlModelManager.getOWLExpressionCheckerFactory().getOWLDescriptionChecker());
+    public OWLClassExpressionCellEditor(OWLEditorKit eKit) {
+        owlModelManager = eKit.getModelManager();
+        
+        final OWLExpressionCheckerFactory fac = owlModelManager.getOWLExpressionCheckerFactory();
+        owlDescriptionEditor = new ExpressionEditor<OWLClassExpression>(eKit, fac.getOWLClassExpressionChecker());
         owlDescriptionEditor.setOpaque(false);
         owlDescriptionEditor.addKeyListener(new KeyAdapter() {
             public void keyPressed(KeyEvent e) {
@@ -98,12 +101,12 @@ public class OWLDescriptionCellEditor extends AbstractCellEditor implements Tabl
     }
 
     public Object getCellEditorValue() {
-        OWLDescription descr = null;
+        OWLClassExpression descr = null;
         try {
             descr = owlDescriptionEditor.createObject();
         }
         catch (OWLException e) {
-            Logger.getLogger(OWLDescriptionCellEditor.class).error(e.getMessage());
+            Logger.getLogger(OWLClassExpressionCellEditor.class).error(e.getMessage());
         }
         return descr;
     }
@@ -113,7 +116,7 @@ public class OWLDescriptionCellEditor extends AbstractCellEditor implements Tabl
             table.setRowHeight(row, EXPANDABLE_ROW_HEIGHT);
         }
 
-        OWLDescription desc = (OWLDescription) value;
+        OWLClassExpression desc = (OWLClassExpression) value;
         if (desc != null) {
             owlDescriptionEditor.setText(owlModelManager.getRendering(desc));
         }

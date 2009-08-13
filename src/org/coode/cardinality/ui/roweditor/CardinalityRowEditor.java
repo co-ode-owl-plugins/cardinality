@@ -2,7 +2,7 @@ package org.coode.cardinality.ui.roweditor;
 
 import org.coode.cardinality.model.CardinalityRow;
 import org.protege.editor.owl.OWLEditorKit;
-import org.semanticweb.owl.model.OWLClass;
+import org.semanticweb.owlapi.model.OWLClass;
 
 import javax.swing.*;
 import java.awt.*;

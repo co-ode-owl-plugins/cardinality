@@ -3,7 +3,7 @@ package org.coode.cardinality.model;
 import org.coode.cardinality.util.ClosureUtils;
 import org.coode.cardinality.util.RestrictionUtils;
 import org.protege.editor.owl.model.OWLModelManager;
-import org.semanticweb.owl.model.*;
+import org.semanticweb.owlapi.model.*;
 
 import javax.swing.*;
 import java.util.*;
@@ -57,9 +57,9 @@ public class CardinalityRowImpl implements CardinalityRow {
     private final OWLProperty originalProperty; // immutable
     private final boolean originallyClosed; // immutable
 
-    protected final Collection<OWLDescription> editableRestrs = new ArrayList<OWLDescription>();
+    protected final Collection<OWLClassExpression> editableRestrs = new ArrayList<OWLClassExpression>();
 
-    protected final Collection<OWLDescription> readonlyRestrs = new ArrayList<OWLDescription>();
+    protected final Collection<OWLClassExpression> readonlyRestrs = new ArrayList<OWLClassExpression>();
 
     protected final OWLModelManager mngr;
 
@@ -110,15 +110,15 @@ public class CardinalityRowImpl implements CardinalityRow {
         editableRestrs.addAll(row.getEditableRestrictions());
     }
 
-    public Set<OWLDescription> getEditableRestrictions() {
-        return new HashSet<OWLDescription>(editableRestrs);
+    public Set<OWLClassExpression> getEditableRestrictions() {
+        return new HashSet<OWLClassExpression>(editableRestrs);
     }
 
-    public Set<OWLDescription> getReadOnlyRestrictions() {
-        return new HashSet<OWLDescription>(readonlyRestrs);
+    public Set<OWLClassExpression> getReadOnlyRestrictions() {
+        return new HashSet<OWLClassExpression>(readonlyRestrs);
     }
 
-    public void addRestriction(OWLDescription restr, boolean readOnly) {
+    public void addRestriction(OWLClassExpression restr, boolean readOnly) {
         if (readOnly) {
             readonlyRestrs.add(restr);
         }
@@ -133,8 +133,8 @@ public class CardinalityRowImpl implements CardinalityRow {
         final OWLDataFactory df = mngr.getOWLDataFactory();
 
         // removeRows all existing restrictions
-        for (OWLDescription restr : editableRestrs) {
-            final OWLSubClassAxiom owlSubClassAxiom = df.getOWLSubClassAxiom(subject, restr);
+        for (OWLClassExpression restr : editableRestrs) {
+            final OWLSubClassOfAxiom owlSubClassAxiom = df.getOWLSubClassOfAxiom(subject, restr);
             changes.addAll(getDeleteAxiomFromAllOntologies(owlSubClassAxiom));
         }
 
@@ -149,8 +149,8 @@ public class CardinalityRowImpl implements CardinalityRow {
             final OWLDataFactory df = mngr.getOWLDataFactory();
 
             // removeRows all existing restrictions
-            for (OWLDescription restr : editableRestrs) {
-                OWLAxiom subclassAxiom = df.getOWLSubClassAxiom(subject, restr);
+            for (OWLClassExpression restr : editableRestrs) {
+                OWLAxiom subclassAxiom = df.getOWLSubClassOfAxiom(subject, restr);
                 changes.addAll(getDeleteAxiomFromAllOntologies(subclassAxiom));
             }
 
@@ -208,33 +208,33 @@ public class CardinalityRowImpl implements CardinalityRow {
         OWLDataFactory df = mngr.getOWLDataFactory();
 
         if (removeOldClosureOnOldProp) { // removeRows old closure on old prop
-            OWLObjectAllRestriction oldClosure = closureUtils.getClosureAxiom(subject, (OWLObjectProperty)originalProperty, originalFiller);
+            OWLObjectAllValuesFrom oldClosure = closureUtils.getClosureAxiom(subject, (OWLObjectProperty)originalProperty, originalFiller);
             if (oldClosure != null) {
-                OWLAxiom subclassAxiom = df.getOWLSubClassAxiom(subject, oldClosure);
+                OWLAxiom subclassAxiom = df.getOWLSubClassOfAxiom(subject, oldClosure);
                 changes.addAll(getDeleteAxiomFromAllOntologies(subclassAxiom));
             }
         }
 
         if (removeOldClosureOnNewProp) { // removeRows old closure axioms along new prop
-            for (OWLObjectAllRestriction closure : closureUtils.getCandidateClosureAxioms(subject, (OWLObjectProperty)prop)) {
-                OWLAxiom subclassAxiom = df.getOWLSubClassAxiom(subject, closure);
+            for (OWLObjectAllValuesFrom closure : closureUtils.getCandidateClosureAxioms(subject, (OWLObjectProperty)prop)) {
+                OWLAxiom subclassAxiom = df.getOWLSubClassOfAxiom(subject, closure);
                 changes.addAll(getDeleteAxiomFromAllOntologies(subclassAxiom));
             }
         }
 
         if (createNewClosureOnNewProp) { // create new closure on new prop
-            Set<OWLDescription> fillers = factory.getFillers((OWLObjectProperty)prop);
+            Set<OWLClassExpression> fillers = factory.getFillers((OWLObjectProperty)prop);
             if (!fillers.isEmpty()) {
-                OWLObjectAllRestriction newClosure = closureUtils.createClosureAxiom((OWLObjectProperty)prop, fillers);
-                changes.add(new AddAxiom(mngr.getActiveOntology(), df.getOWLSubClassAxiom(subject, newClosure)));
+                OWLObjectAllValuesFrom newClosure = closureUtils.createClosureAxiom((OWLObjectProperty)prop, fillers);
+                changes.add(new AddAxiom(mngr.getActiveOntology(), df.getOWLSubClassOfAxiom(subject, newClosure)));
             }
         }
 
         if (createNewClosureOnOldProp) { // create new closure on old prop
-            Set<OWLDescription> fillers = factory.getFillers((OWLObjectProperty)originalProperty);
+            Set<OWLClassExpression> fillers = factory.getFillers((OWLObjectProperty)originalProperty);
             if (!fillers.isEmpty()) {
-                OWLObjectAllRestriction newClosure = closureUtils.createClosureAxiom((OWLObjectProperty)originalProperty, fillers);
-                changes.add(new AddAxiom(mngr.getActiveOntology(), df.getOWLSubClassAxiom(subject, newClosure)));
+                OWLObjectAllValuesFrom newClosure = closureUtils.createClosureAxiom((OWLObjectProperty)originalProperty, fillers);
+                changes.add(new AddAxiom(mngr.getActiveOntology(), df.getOWLSubClassOfAxiom(subject, newClosure)));
             }
         }
         return changes;
@@ -268,7 +268,7 @@ public class CardinalityRowImpl implements CardinalityRow {
         return editableRestrs.isEmpty();
     }
 
-    public boolean contains(OWLDescription restr) {
+    public boolean contains(OWLClassExpression restr) {
         return editableRestrs.contains(restr) || readonlyRestrs.contains(restr);
     }
 

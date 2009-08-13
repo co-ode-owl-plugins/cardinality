@@ -1,7 +1,9 @@
 package org.coode.cardinality.util;
 
 import org.protege.editor.owl.model.util.ClosureAxiomFactory;
-import org.semanticweb.owl.model.*;
+import org.semanticweb.owlapi.model.*;
+
+import java.util.Set;
 
 /**
  * Author: drummond<br>
@@ -17,24 +19,24 @@ import org.semanticweb.owl.model.*;
  */
 public class CardinalityClosureFactory extends ClosureAxiomFactory {
 
-    public CardinalityClosureFactory(OWLObjectProperty objectProperty, OWLDataFactory owlDataFactory) {
-        super(owlDataFactory, objectProperty, owlDataFactory);
+    public CardinalityClosureFactory(OWLObjectProperty objectProperty, OWLDataFactory owlDataFactory, Set<OWLOntology> ontologies) {
+        super(objectProperty, owlDataFactory, ontologies);
     }
 
-    public void visit(OWLObjectMinCardinalityRestriction restr) {
+    public void visit(OWLObjectMinCardinality restr) {
         if (restr.getCardinality() > 0){
             accumulate(restr);
         }
     }
 
-    public void visit(OWLObjectExactCardinalityRestriction restr) {
+    public void visit(OWLObjectExactCardinality restr) {
         if (restr.getCardinality() > 0){
             accumulate(restr);
         }
     }
 
     private void accumulate(OWLObjectCardinalityRestriction restr){
-        OWLDescription filler = restr.getFiller();
+        OWLClassExpression filler = restr.getFiller();
         if (!filler.equals(owlDataFactory.getOWLThing())) {
             fillers.add(filler);
         }

@@ -1,6 +1,6 @@
 package org.coode.cardinality.model;
 
-import org.semanticweb.owl.model.*;
+import org.semanticweb.owlapi.model.*;
 
 import java.util.List;
 import java.util.Set;
@@ -45,7 +45,7 @@ public interface CardinalityRow extends Comparable, Mergeable<CardinalityRow> {
 
     void setFactory(CardinalityRowFactory model);
 
-    void addRestriction(OWLDescription restr, boolean readOnly);
+    void addRestriction(OWLClassExpression restr, boolean readOnly);
 
     List<OWLOntologyChange> getDeleteChanges();
 
@@ -67,11 +67,11 @@ public interface CardinalityRow extends Comparable, Mergeable<CardinalityRow> {
 
     boolean isReadOnly();
 
-    boolean contains(OWLDescription restr);
+    boolean contains(OWLClassExpression restr);
 
-    Set<OWLDescription> getEditableRestrictions();
+    Set<OWLClassExpression> getEditableRestrictions();
 
-    Set<OWLDescription> getReadOnlyRestrictions();
+    Set<OWLClassExpression> getReadOnlyRestrictions();
 
 //    boolean isMinReadOnly();
 //

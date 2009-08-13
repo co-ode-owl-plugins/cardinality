@@ -3,7 +3,7 @@ package org.coode.cardinality.model;
 import org.coode.cardinality.prefs.CardiPrefs;
 import org.coode.cardinality.prefs.CardinalityProperties;
 import org.protege.editor.owl.model.OWLModelManager;
-import org.semanticweb.owl.model.*;
+import org.semanticweb.owlapi.model.*;
 
 import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;
@@ -173,7 +173,7 @@ public class CardinalityTableModel extends AbstractTableModel {
                 case COL_MAX:
                     // cannot edit the min, max of 1 if this is a hasValue restriction
                     if (getRow(rowIndex).getFiller() instanceof OWLIndividual ||
-                            getRow(rowIndex).getFiller() instanceof OWLConstant){
+                            getRow(rowIndex).getFiller() instanceof OWLLiteral){
                         result = false;
                     }
                     break;
@@ -228,17 +228,17 @@ public class CardinalityTableModel extends AbstractTableModel {
     private void handleOntologiesChanged(List<? extends OWLOntologyChange> list) {
         boolean reload = false;
         for (OWLOntologyChange ontologyChange : list){
-            OWLDescription subclass = null;
-            OWLDescription superclass = null;
+            OWLClassExpression subclass = null;
+            OWLClassExpression superclass = null;
             OWLAxiom axiom = ontologyChange.getAxiom();
-            if (axiom instanceof OWLSubClassAxiom) {
-                subclass = ((OWLSubClassAxiom) axiom).getSubClass();
-                superclass = ((OWLSubClassAxiom) axiom).getSuperClass();
+            if (axiom instanceof OWLSubClassOfAxiom) {
+                subclass = ((OWLSubClassOfAxiom) axiom).getSubClass();
+                superclass = ((OWLSubClassOfAxiom) axiom).getSuperClass();
             }
 
             if (subclass != null) {
                 if ((subclass.equals(getSubject())) ||
-                    (mngr.getOWLClassHierarchyProvider().getAncestors(getSubject()).contains(subclass))) {
+                    (mngr.getOWLHierarchyManager().getOWLClassHierarchyProvider().getAncestors(getSubject()).contains(subclass))) {
                     if (superclass instanceof OWLClass ||
                         superclass instanceof OWLRestriction ||
                         superclass instanceof OWLObjectComplementOf) {

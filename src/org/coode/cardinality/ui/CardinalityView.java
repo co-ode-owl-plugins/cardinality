@@ -2,8 +2,8 @@ package org.coode.cardinality.ui;
 
 import org.coode.cardinality.action.AddRowAction;
 import org.coode.cardinality.action.DeleteRowAction;
-import org.protege.editor.owl.ui.view.AbstractOWLClassViewComponent;
-import org.semanticweb.owl.model.OWLClass;
+import org.protege.editor.owl.ui.view.cls.AbstractOWLClassViewComponent;
+import org.semanticweb.owlapi.model.OWLClass;
 
 import javax.swing.*;
 import java.awt.*;
@@ -73,5 +73,7 @@ public class CardinalityView extends AbstractOWLClassViewComponent {
 
     public void disposeView() {
         table.dispose();
+        addRowAction.dispose();
+        deleteRowAction.dispose();
     }
 }

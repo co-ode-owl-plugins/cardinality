@@ -1,7 +1,7 @@
 package org.coode.cardinality.util;
 
-import org.semanticweb.owl.model.*;
-import org.semanticweb.owl.util.OWLObjectVisitorAdapter;
+import org.semanticweb.owlapi.model.*;
+import org.semanticweb.owlapi.util.OWLObjectVisitorAdapter;
 /*
 * Copyright (C) 2007, University of Manchester
 *
@@ -37,57 +37,57 @@ public class FillerFinder extends OWLObjectVisitorAdapter {
 
     private OWLObject filler;
 
-    public OWLObject getFiller(OWLDescription owlRestr) {
+    public OWLObject getFiller(OWLClassExpression owlRestr) {
         filler = null;
         owlRestr.accept(this);
         return filler;
     }
 
-    public void visit(OWLObjectSomeRestriction desc) {
+    public void visit(OWLObjectSomeValuesFrom desc) {
         filler = desc.getFiller();
     }
 
-    public void visit(OWLObjectAllRestriction desc) {
+    public void visit(OWLObjectAllValuesFrom desc) {
         filler = desc.getFiller();
     }
 
-    public void visit(OWLObjectValueRestriction desc) {
+    public void visit(OWLObjectHasValue desc) {
         filler = desc.getValue();
     }
 
-    public void visit(OWLObjectMinCardinalityRestriction desc) {
+    public void visit(OWLObjectMinCardinality desc) {
         filler = desc.getFiller();
     }
 
-    public void visit(OWLObjectExactCardinalityRestriction desc) {
+    public void visit(OWLObjectExactCardinality desc) {
         filler = desc.getFiller();
     }
 
-    public void visit(OWLObjectMaxCardinalityRestriction desc) {
+    public void visit(OWLObjectMaxCardinality desc) {
         filler = desc.getFiller();
     }
 
-    public void visit(OWLDataSomeRestriction desc) {
+    public void visit(OWLDataSomeValuesFrom desc) {
         filler = desc.getFiller();
     }
 
-    public void visit(OWLDataAllRestriction desc) {
+    public void visit(OWLDataAllValuesFrom desc) {
         filler = desc.getFiller();
     }
 
-    public void visit(OWLDataValueRestriction desc) {
+    public void visit(OWLDataHasValue desc) {
         filler = desc.getValue();
     }
 
-    public void visit(OWLDataMinCardinalityRestriction desc) {
+    public void visit(OWLDataMinCardinality desc) {
         filler = desc.getFiller();
     }
 
-    public void visit(OWLDataExactCardinalityRestriction desc) {
+    public void visit(OWLDataExactCardinality desc) {
         filler = desc.getFiller();
     }
 
-    public void visit(OWLDataMaxCardinalityRestriction desc) {
+    public void visit(OWLDataMaxCardinality desc) {
         filler = desc.getFiller();
     }
 

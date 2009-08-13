@@ -3,17 +3,17 @@ package org.coode.cardinality.ui;
 import org.coode.cardinality.model.CardinalityRow;
 import org.coode.cardinality.model.CardinalityTableModel;
 import org.coode.cardinality.prefs.CardiPrefs;
-import org.coode.cardinality.ui.celleditor.OWLConstantCellEditor;
-import org.coode.cardinality.ui.celleditor.OWLDescriptionCellEditor;
+import org.coode.cardinality.ui.celleditor.OWLClassExpressionCellEditor;
+import org.coode.cardinality.ui.celleditor.OWLLiteralCellEditor;
 import org.coode.cardinality.ui.celleditor.PropCombo;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.ui.UIHelper;
 import org.protege.editor.owl.ui.renderer.OWLCellRenderer;
 import org.protege.editor.owl.ui.table.BasicLinkedOWLObjectTable;
-import org.semanticweb.owl.model.OWLConstant;
-import org.semanticweb.owl.model.OWLObject;
-import org.semanticweb.owl.model.OWLObjectProperty;
-import org.semanticweb.owl.model.OWLProperty;
+import org.semanticweb.owlapi.model.OWLLiteral;
+import org.semanticweb.owlapi.model.OWLObject;
+import org.semanticweb.owlapi.model.OWLObjectProperty;
+import org.semanticweb.owlapi.model.OWLProperty;
 
 import javax.swing.*;
 import javax.swing.table.*;
@@ -71,7 +71,7 @@ public class CardinalityTable extends BasicLinkedOWLObjectTable {
     private TableCellEditor descrFillerEditor;
     private TableCellEditor dataFillerEditor;
     private TableCellEditor dataPropEditor;
-    private OWLConstantCellEditor dataConstantEditor;
+    private OWLLiteralCellEditor dataLiteralEditor;
 
     private PropCombo objPropCombo;
     private PropCombo dataPropCombo;
@@ -187,8 +187,8 @@ public class CardinalityTable extends BasicLinkedOWLObjectTable {
         };
 
         // filler expression editor
-        descrFillerEditor = new OWLDescriptionCellEditor(eKit);
-        ((OWLDescriptionCellEditor) descrFillerEditor).setExpandable(true);
+        descrFillerEditor = new OWLClassExpressionCellEditor(eKit);
+        ((OWLClassExpressionCellEditor) descrFillerEditor).setExpandable(true);
 
         // datatype dropdown
         dataFillerEditor = new DefaultCellEditor(new UIHelper(eKit).getDatatypeSelector()){
@@ -202,7 +202,7 @@ public class CardinalityTable extends BasicLinkedOWLObjectTable {
             }
         };
 
-        dataConstantEditor = new OWLConstantCellEditor(new JTextField(), eKit.getModelManager());
+        dataLiteralEditor = new OWLLiteralCellEditor(new JTextField(), eKit.getModelManager());
     }
 
     public CardinalityTableModel getModel() {
@@ -270,8 +270,8 @@ public class CardinalityTable extends BasicLinkedOWLObjectTable {
                 }
                 else{
                     final OWLObject filler = getModel().getRow(row).getFiller();
-                    if (filler instanceof OWLConstant){
-                        return dataConstantEditor;
+                    if (filler instanceof OWLLiteral){
+                        return dataLiteralEditor;
                     }
                     else{
                         return dataFillerEditor;

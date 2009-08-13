@@ -1,16 +1,16 @@
 package org.coode.cardinality.ui.roweditor;
 
 import org.protege.editor.owl.OWLEditorKit;
-import org.semanticweb.owl.model.OWLDataFactory;
-import org.semanticweb.owl.model.OWLDataType;
-import org.semanticweb.owl.model.OWLTypedConstant;
-import org.semanticweb.owl.vocab.OWLRestrictedDataRangeFacetVocabulary;
-import org.semanticweb.owl.vocab.XSDVocabulary;
+import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLDataFactory;
+import org.semanticweb.owlapi.model.OWLDatatype;
+import org.semanticweb.owlapi.model.OWLTypedLiteral;
+import org.semanticweb.owlapi.vocab.OWLFacet;
+import org.semanticweb.owlapi.vocab.XSDVocabulary;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 /*
@@ -46,8 +46,7 @@ import java.util.Map;
  */
 public class DataRangeFacetPanel extends JPanel {
 
-    private Map<OWLRestrictedDataRangeFacetVocabulary, JTextField> componentMap =
-            new HashMap<OWLRestrictedDataRangeFacetVocabulary, JTextField>();
+    private Map<OWLFacet, JTextField> componentMap = new HashMap<OWLFacet, JTextField>();
     private OWLEditorKit eKit;
 
 
@@ -86,8 +85,8 @@ public class DataRangeFacetPanel extends JPanel {
         gc.gridy = 0;
         gc.insets = new Insets(4, 4, 4, 4);
 
-        for (URI facetURI : OWLRestrictedDataRangeFacetVocabulary.getFacetURIs()){
-            OWLRestrictedDataRangeFacetVocabulary facet = OWLRestrictedDataRangeFacetVocabulary.getFacet(facetURI);
+        for (IRI facetIRI : OWLFacet.getFacetIRIs()){
+            OWLFacet facet = OWLFacet.getFacet(facetIRI);
             gc.gridx = 0;
             gc.anchor = GridBagConstraints.LINE_END;
             gc.fill = GridBagConstraints.NONE;
@@ -110,21 +109,20 @@ public class DataRangeFacetPanel extends JPanel {
         return internalPanel;
     }
 
-    public Map<OWLRestrictedDataRangeFacetVocabulary, OWLTypedConstant> getFacetValueMap(OWLDataType baseType) {
-        Map<OWLRestrictedDataRangeFacetVocabulary, OWLTypedConstant> results =
-                new HashMap<OWLRestrictedDataRangeFacetVocabulary, OWLTypedConstant>();
+    public Map<OWLFacet, OWLTypedLiteral> getFacetValueMap(OWLDatatype baseType) {
+        Map<OWLFacet, OWLTypedLiteral> results = new HashMap<OWLFacet, OWLTypedLiteral>();
         OWLDataFactory df = eKit.getModelManager().getOWLDataFactory();
-        for (OWLRestrictedDataRangeFacetVocabulary facet : componentMap.keySet()){
+        for (OWLFacet facet : componentMap.keySet()){
             final String valueStr = componentMap.get(facet).getText();
             if (valueStr != null && !valueStr.equals("")){
-                OWLTypedConstant value = df.getOWLTypedConstant(valueStr, getOWLDataTypeForFacet(facet, baseType));
+                OWLTypedLiteral value = df.getOWLTypedLiteral(valueStr, getOWLDataTypeForFacet(facet, baseType));
                 results.put(facet, value);
             }
         }
         return results;
     }
 
-    private OWLDataType getOWLDataTypeForFacet(OWLRestrictedDataRangeFacetVocabulary facet, OWLDataType baseType) {
+    private OWLDatatype getOWLDataTypeForFacet(OWLFacet facet, OWLDatatype baseType) {
         OWLDataFactory df = eKit.getModelManager().getOWLDataFactory();
         switch(facet){
             case MIN_EXCLUSIVE:     // fallthrough
@@ -135,9 +133,9 @@ public class DataRangeFacetPanel extends JPanel {
             case LENGTH:            // fallthrough
             case FRACTION_DIGITS:   // fallthrough
             case TOTAL_DIGITS:
-                return df.getOWLDataType(XSDVocabulary.INTEGER.getURI());
+                return df.getOWLDatatype(XSDVocabulary.INTEGER.getURI());
             default:
-                return df.getOWLDataType(XSDVocabulary.STRING.getURI());
+                return df.getOWLDatatype(XSDVocabulary.STRING.getURI());
         }
     }
 }

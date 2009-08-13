@@ -2,7 +2,7 @@ package org.coode.cardinality.util;
 
 import org.protege.editor.owl.model.OWLModelManager;
 import org.protege.editor.owl.model.hierarchy.OWLObjectHierarchyProvider;
-import org.semanticweb.owl.model.*;
+import org.semanticweb.owlapi.model.*;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -24,7 +24,7 @@ public class RestrictionUtils {
      * @param owlRestr
      * @return the filler of the restriction (cardi will be qualified)
      */
-    public static OWLObject getOWLFiller(OWLDescription owlRestr) {
+    public static OWLObject getOWLFiller(OWLClassExpression owlRestr) {
         return new FillerFinder().getFiller(owlRestr);
     }
 
@@ -32,7 +32,7 @@ public class RestrictionUtils {
      * @param owlRestr
      * @return 0 if none set or value if otherwise
      */
-    public static int getMinRelationships(OWLDescription owlRestr) {
+    public static int getMinRelationships(OWLClassExpression owlRestr) {
         return new MinCardinalityFinder().getMin(owlRestr);
     }
 
@@ -40,7 +40,7 @@ public class RestrictionUtils {
      * @param owlRestr
      * @return -1 if infinite or value if otherwise
      */
-    public static int getMaxRelationships(OWLDescription owlRestr) {
+    public static int getMaxRelationships(OWLClassExpression owlRestr) {
         return new MaxCardinalityFinder().getMax(owlRestr);
     }
 
@@ -51,8 +51,8 @@ public class RestrictionUtils {
      * @param mngr
      * @return set of conditions specified by <code>filterRestrictions</code> or empty list if none
      */
-    public static Set<OWLDescription> getDirectRestrictionsOnClass(OWLClass cls, OWLModelManager mngr) {
-        Set<OWLDescription> directRestrs = new HashSet<OWLDescription>();
+    public static Set<OWLClassExpression> getDirectRestrictionsOnClass(OWLClass cls, OWLModelManager mngr) {
+        Set<OWLClassExpression> directRestrs = new HashSet<OWLClassExpression>();
         for (OWLOntology ont : mngr.getActiveOntologies()){
             directRestrs.addAll(cls.getSuperClasses(ont));
         }
@@ -67,9 +67,9 @@ public class RestrictionUtils {
      * @param mngr
      * @return set of conditions specified by <code>filterRestrictions</code> or empty list if none
      */
-    public static Set<OWLDescription> getInheritedRestrictionsOnClass(OWLClass cls, OWLModelManager mngr) {
-        Set<OWLDescription> inheritedRestrs = new HashSet<OWLDescription>();
-        Set<OWLClass> ancestors = mngr.getOWLClassHierarchyProvider().getAncestors(cls);
+    public static Set<OWLClassExpression> getInheritedRestrictionsOnClass(OWLClass cls, OWLModelManager mngr) {
+        Set<OWLClassExpression> inheritedRestrs = new HashSet<OWLClassExpression>();
+        Set<OWLClass> ancestors = mngr.getOWLHierarchyManager().getOWLClassHierarchyProvider().getAncestors(cls);
         for (OWLClass ancestor : ancestors) {
             for (OWLOntology ont : mngr.getActiveOntologies()){
                 inheritedRestrs.addAll(ancestor.getSuperClasses(ont));
@@ -79,12 +79,12 @@ public class RestrictionUtils {
     }
 
     /**
-     * @param all any number of OWLDescriptions
+     * @param all any number of OWLClassExpressions
      * @return a subset of all containing only restrictions and negated some restrictions or an empty list
      */
-    public static Set<OWLDescription> filterRestrictions(Set<OWLDescription> all) {
-        Set<OWLDescription> filtered = new HashSet<OWLDescription>();
-        for (OWLDescription descr : all) {
+    public static Set<OWLClassExpression> filterRestrictions(Set<OWLClassExpression> all) {
+        Set<OWLClassExpression> filtered = new HashSet<OWLClassExpression>();
+        for (OWLClassExpression descr : all) {
             // @@TODO if we can make this read only, we should extract restrs from intersections (hard to maintain editing)
 //            if (descr instanceof OWLObjectIntersectionOf){ // split the contents of intersections
 //                filtered.addAll(filterRestrictions(((OWLObjectIntersectionOf)descr).getOperands()));
@@ -101,33 +101,33 @@ public class RestrictionUtils {
     }
 
     public static boolean isSubPropOf(OWLObjectProperty prop, OWLObjectProperty onProp, OWLModelManager mngr) {
-        OWLObjectHierarchyProvider<OWLObjectProperty> hp = mngr.getOWLObjectPropertyHierarchyProvider();
+        OWLObjectHierarchyProvider<OWLObjectProperty> hp = mngr.getOWLHierarchyManager().getOWLObjectPropertyHierarchyProvider();
         return hp.getAncestors(prop).contains(onProp);
     }
 
     public static boolean isSubPropOf(OWLDataProperty prop, OWLDataProperty onProp, OWLModelManager mngr) {
-        OWLObjectHierarchyProvider<OWLDataProperty> hp = mngr.getOWLDataPropertyHierarchyProvider();
+        OWLObjectHierarchyProvider<OWLDataProperty> hp = mngr.getOWLHierarchyManager().getOWLDataPropertyHierarchyProvider();
         return hp.getAncestors(prop).contains(onProp);
     }
 
-    public static Set<OWLObjectAllRestriction> getUniversals(OWLClass namedClass, OWLModelManager mngr) {
-        Set<OWLObjectAllRestriction> candidates = new HashSet<OWLObjectAllRestriction>();
-        Set<OWLDescription> restrs = getDirectRestrictionsOnClass(namedClass, mngr);
+    public static Set<OWLObjectAllValuesFrom> getUniversals(OWLClass namedClass, OWLModelManager mngr) {
+        Set<OWLObjectAllValuesFrom> candidates = new HashSet<OWLObjectAllValuesFrom>();
+        Set<OWLClassExpression> restrs = getDirectRestrictionsOnClass(namedClass, mngr);
         restrs.addAll(getInheritedRestrictionsOnClass(namedClass, mngr));
-        for (OWLDescription restr : restrs) {
-            if (restr instanceof OWLObjectAllRestriction) {
-                candidates.add((OWLObjectAllRestriction) restr);
+        for (OWLClassExpression restr : restrs) {
+            if (restr instanceof OWLObjectAllValuesFrom) {
+                candidates.add((OWLObjectAllValuesFrom) restr);
             }
         }
         return candidates;
     }
 
-    public static boolean isNotSome(OWLDescription descr) {
+    public static boolean isNotSome(OWLClassExpression descr) {
         return (descr instanceof OWLObjectComplementOf) &&
-               (((OWLObjectComplementOf) descr).getOperand() instanceof OWLObjectSomeRestriction);
+               (((OWLObjectComplementOf) descr).getOperand() instanceof OWLObjectSomeValuesFrom);
     }
 
-    public static OWLProperty getProperty(OWLDescription restr) {
+    public static OWLProperty getProperty(OWLClassExpression restr) {
         if (restr instanceof OWLRestriction) {
             OWLPropertyExpression propExpression = ((OWLRestriction) restr).getProperty();
             if (propExpression instanceof OWLProperty){
@@ -135,7 +135,7 @@ public class RestrictionUtils {
             }
         }
         else if (isNotSome(restr)) {
-            final OWLObjectSomeRestriction svf = ((OWLObjectSomeRestriction) ((OWLObjectComplementOf) restr).getOperand());
+            final OWLObjectSomeValuesFrom svf = ((OWLObjectSomeValuesFrom) ((OWLObjectComplementOf) restr).getOperand());
             OWLPropertyExpression propExpression = svf.getProperty();
             if (propExpression instanceof OWLProperty){
                 return (OWLProperty)propExpression;
@@ -152,17 +152,17 @@ public class RestrictionUtils {
 //     * @return
 //     * @throws OWLException
 //     */
-//    public static Set<OWLDescription> getNamedFillers(OWLClass subject, OWLObjectProperty prop, OWLModelManager mngr) throws OWLException {
-//        Set<OWLDescription> supers = subject.getSuperClasses(mngr.getActiveOntology());
+//    public static Set<OWLClassExpression> getNamedFillers(OWLClass subject, OWLObjectProperty prop, OWLModelManager mngr) throws OWLException {
+//        Set<OWLClassExpression> supers = subject.getSuperClasses(mngr.getActiveOntology());
 //        ObjectSomeRestrictionFillerExtractor fillerCalc = new ObjectSomeRestrictionFillerExtractor(prop);
-//        for (OWLDescription s : supers) {
+//        for (OWLClassExpression s : supers) {
 //            s.accept(fillerCalc);
 //        }
 //
-//        Set<OWLDescription> namedFillers = new HashSet<OWLDescription>();
-//        for (OWLDescription filler : fillerCalc.getFillers()) {
+//        Set<OWLClassExpression> namedFillers = new HashSet<OWLClassExpression>();
+//        for (OWLClassExpression filler : fillerCalc.getFillers()) {
 //            if (filler instanceof OWLClass) {
-//                namedFillers.add((OWLDescription) filler);
+//                namedFillers.add((OWLClassExpression) filler);
 //            }
 //        }
 //        return namedFillers;

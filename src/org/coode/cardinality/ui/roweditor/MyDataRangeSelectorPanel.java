@@ -2,7 +2,7 @@ package org.coode.cardinality.ui.roweditor;
 
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.ui.selector.OWLDataTypeSelectorPanel;
-import org.semanticweb.owl.model.OWLDataType;
+import org.semanticweb.owlapi.model.OWLDatatype;
 
 import javax.swing.*;
 import java.awt.*;
@@ -64,7 +64,7 @@ public class MyDataRangeSelectorPanel extends JPanel {
         add(selectorPanel, BorderLayout.CENTER);
     }
 
-    public OWLDataType getSelectedDataType(){
+    public OWLDatatype getSelectedDataType(){
         return selectorPanel.getSelectedObject();
     }
 }

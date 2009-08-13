@@ -1,10 +1,10 @@
 package org.coode.cardinality.ui.celleditor;
 
 import org.protege.editor.owl.model.OWLModelManager;
-import org.semanticweb.owl.model.OWLConstant;
-import org.semanticweb.owl.model.OWLDataType;
-import org.semanticweb.owl.model.OWLTypedConstant;
-import org.semanticweb.owl.model.OWLUntypedConstant;
+import org.semanticweb.owlapi.model.OWLDatatype;
+import org.semanticweb.owlapi.model.OWLLiteral;
+import org.semanticweb.owlapi.model.OWLStringLiteral;
+import org.semanticweb.owlapi.model.OWLTypedLiteral;
 
 import javax.swing.*;
 import java.awt.*;
@@ -39,13 +39,13 @@ import java.awt.*;
  * Bio Health Informatics Group<br>
  * Date: Sep 7, 2007<br><br>
  */
-public class OWLConstantCellEditor extends DefaultCellEditor {
+public class OWLLiteralCellEditor extends DefaultCellEditor {
 
-    private OWLDataType type;
+    private OWLDatatype type;
     private OWLModelManager mngr;
     private String lang;
 
-    public OWLConstantCellEditor(JTextField jTextField, OWLModelManager mngr) {
+    public OWLLiteralCellEditor(JTextField jTextField, OWLModelManager mngr) {
         super(jTextField);
         this.mngr = mngr;
     }
@@ -53,17 +53,17 @@ public class OWLConstantCellEditor extends DefaultCellEditor {
     public Component getTableCellEditorComponent(JTable jTable, Object object, boolean b, int i, int i1) {
 
         // retain the existing type or language
-        if (object instanceof OWLTypedConstant){
-            type = ((OWLTypedConstant)object).getDataType();
+        if (object instanceof OWLTypedLiteral){
+            type = ((OWLTypedLiteral)object).getDatatype();
             lang = null;
         }
         else{
             type = null;
-            lang = ((OWLUntypedConstant)object).getLang();
+            lang = ((OWLStringLiteral)object).getLang();
         }
 
         // unwrap the literal from the constant for editing
-        object = ((OWLConstant)object).getLiteral();
+        object = ((OWLLiteral)object).getLiteral();
 
         return super.getTableCellEditorComponent(jTable, object, b, i, i1);
     }
@@ -72,14 +72,14 @@ public class OWLConstantCellEditor extends DefaultCellEditor {
         Object value = super.getCellEditorValue();
         if (value != null){
             if (type != null){
-                value = mngr.getOWLDataFactory().getOWLTypedConstant((String)value, type);
+                value = mngr.getOWLDataFactory().getOWLTypedLiteral((String)value, type);
             }
             else{
                 if (lang != null){
-                    value = mngr.getOWLDataFactory().getOWLUntypedConstant((String)value, lang);
+                    value = mngr.getOWLDataFactory().getOWLStringLiteral((String)value, lang);
                 }
                 else{
-                    value = mngr.getOWLDataFactory().getOWLUntypedConstant((String)value);
+                    value = mngr.getOWLDataFactory().getOWLStringLiteral((String)value);
                 }
             }
         }

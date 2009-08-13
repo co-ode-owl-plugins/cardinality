@@ -1,7 +1,7 @@
 package org.coode.cardinality.util;
 
-import org.semanticweb.owl.model.*;
-import org.semanticweb.owl.util.OWLObjectVisitorAdapter;
+import org.semanticweb.owlapi.model.*;
+import org.semanticweb.owlapi.util.OWLObjectVisitorAdapter;
 /*
 * Copyright (C) 2007, University of Manchester
 *
@@ -45,35 +45,35 @@ public class MinCardinalityFinder extends OWLObjectVisitorAdapter {
         return min;
     }
 
-    public void visit(OWLObjectSomeRestriction owlObjectSomeRestriction) {
+    public void visit(OWLObjectSomeValuesFrom owlObjectSomeRestriction) {
         min = 1;
     }
 
-    public void visit(OWLObjectValueRestriction owlObjectValueRestriction) {
+    public void visit(OWLObjectHasValue owlObjectValueRestriction) {
         min = 1;
     }
 
-    public void visit(OWLObjectMinCardinalityRestriction cardi) {
+    public void visit(OWLObjectMinCardinality cardi) {
         min = cardi.getCardinality();
     }
 
-    public void visit(OWLObjectExactCardinalityRestriction cardi) {
+    public void visit(OWLObjectExactCardinality cardi) {
         min = cardi.getCardinality();
     }
 
-    public void visit(OWLDataSomeRestriction owlDataSomeRestriction) {
+    public void visit(OWLDataSomeValuesFrom owlDataSomeRestriction) {
         min = 1;
     }
 
-    public void visit(OWLDataValueRestriction owlDataValueRestriction) {
+    public void visit(OWLDataHasValue owlDataValueRestriction) {
         min = 1;
     }
 
-    public void visit(OWLDataMinCardinalityRestriction cardi) {
+    public void visit(OWLDataMinCardinality cardi) {
         min = cardi.getCardinality();
     }
 
-    public void visit(OWLDataExactCardinalityRestriction cardi) {
+    public void visit(OWLDataExactCardinality cardi) {
         min = cardi.getCardinality();
     }
 }

@@ -4,9 +4,9 @@ import org.coode.cardinality.model.CardinalityRow;
 import org.coode.cardinality.model.CardinalityRowFactory;
 import org.protege.editor.core.ui.util.ComponentFactory;
 import org.protege.editor.owl.OWLEditorKit;
-import org.semanticweb.owl.model.OWLClass;
-import org.semanticweb.owl.model.OWLObject;
-import org.semanticweb.owl.model.OWLProperty;
+import org.semanticweb.owlapi.model.OWLClass;
+import org.semanticweb.owlapi.model.OWLObject;
+import org.semanticweb.owlapi.model.OWLProperty;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;

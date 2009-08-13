@@ -3,10 +3,9 @@ package org.coode.cardinality.test;
 import junit.framework.TestCase;
 import org.apache.log4j.Logger;
 import org.coode.cardinality.model.CardinalityTableModel;
-import org.protege.editor.owl.model.OWLModelManager;
 import org.protege.editor.owl.model.OWLModelManagerImpl;
-import org.semanticweb.owl.model.OWLClass;
-import org.semanticweb.owl.model.OWLException;
+import org.semanticweb.owlapi.model.OWLClass;
+import org.semanticweb.owlapi.model.OWLException;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -46,7 +45,7 @@ import java.net.URISyntaxException;
  */
 public class TestCardinalityTableModel extends TestCase {
 
-    OWLModelManager mngr;
+    OWLModelManagerImpl mngr;
     CardinalityTableModel model;
 
     private static final String BASE_URI = "http://www.co-ode.org/ontologies/pizza/2006/07/18/pizza.owl";
@@ -54,7 +53,7 @@ public class TestCardinalityTableModel extends TestCase {
     void setup() {
         try {
             mngr = new OWLModelManagerImpl();
-            mngr.loadOntology(new URI(BASE_URI));
+            mngr.loadOntologyFromPhysicalURI(new URI(BASE_URI));
 
             model = new CardinalityTableModel(mngr);
         }

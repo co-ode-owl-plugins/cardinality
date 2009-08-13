@@ -5,9 +5,8 @@ import org.protege.editor.owl.model.OWLModelManager;
 import org.protege.editor.owl.model.event.EventType;
 import org.protege.editor.owl.model.event.OWLModelManagerChangeEvent;
 import org.protege.editor.owl.model.event.OWLModelManagerListener;
-import org.protege.editor.owl.ui.OWLEntityComparator;
 import org.protege.editor.owl.ui.renderer.OWLCellRenderer;
-import org.semanticweb.owl.model.*;
+import org.semanticweb.owlapi.model.*;
 
 import javax.swing.*;
 import java.util.Collections;
@@ -53,8 +52,6 @@ public class PropCombo extends JComboBox {
 
     private boolean changesMade = false;
 
-    private OWLEntityComparator<OWLProperty> comp;
-
     public static final int OBJ_PROPS = 0;
     public static final int DATA_PROPS = 1;
 
@@ -89,8 +86,6 @@ public class PropCombo extends JComboBox {
 
         mngr = eKit.getModelManager();
 
-        comp = new OWLEntityComparator<OWLProperty>(mngr);
-
         setRenderer(new OWLCellRenderer(eKit));
 
         // deal with adding and removing object properties
@@ -122,7 +117,7 @@ public class PropCombo extends JComboBox {
         else{
             props = new LinkedList<OWLProperty>(mngr.getActiveOntology().getReferencedDataProperties());
         }
-        Collections.sort(props, comp);
+        Collections.sort(props, mngr.getOWLObjectComparator());
         addItems(props);
     }
 
