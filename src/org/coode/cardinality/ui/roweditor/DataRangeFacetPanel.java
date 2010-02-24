@@ -133,9 +133,9 @@ public class DataRangeFacetPanel extends JPanel {
             case LENGTH:            // fallthrough
             case FRACTION_DIGITS:   // fallthrough
             case TOTAL_DIGITS:
-                return df.getOWLDatatype(XSDVocabulary.INTEGER.getURI());
+                return df.getOWLDatatype(XSDVocabulary.INTEGER.getIRI());
             default:
-                return df.getOWLDatatype(XSDVocabulary.STRING.getURI());
+                return df.getOWLDatatype(XSDVocabulary.STRING.getIRI());
         }
     }
 }

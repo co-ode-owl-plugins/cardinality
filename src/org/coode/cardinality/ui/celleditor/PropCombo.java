@@ -112,10 +112,10 @@ public class PropCombo extends JComboBox {
     private void load() {
         List<OWLProperty> props;
         if (type == OBJ_PROPS){
-            props = new LinkedList<OWLProperty>(mngr.getActiveOntology().getReferencedObjectProperties());
+            props = new LinkedList<OWLProperty>(mngr.getActiveOntology().getObjectPropertiesInSignature());
         }
         else{
-            props = new LinkedList<OWLProperty>(mngr.getActiveOntology().getReferencedDataProperties());
+            props = new LinkedList<OWLProperty>(mngr.getActiveOntology().getDataPropertiesInSignature());
         }
         Collections.sort(props, mngr.getOWLObjectComparator());
         addItems(props);
