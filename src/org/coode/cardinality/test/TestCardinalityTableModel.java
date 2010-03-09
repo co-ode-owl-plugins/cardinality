@@ -4,8 +4,8 @@ import junit.framework.TestCase;
 import org.apache.log4j.Logger;
 import org.coode.cardinality.model.CardinalityTableModel;
 import org.protege.editor.owl.model.OWLModelManagerImpl;
+import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLClass;
-import org.semanticweb.owlapi.model.OWLException;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -57,9 +57,6 @@ public class TestCardinalityTableModel extends TestCase {
 
             model = new CardinalityTableModel(mngr);
         }
-        catch (OWLException e) {
-            Logger.getLogger(TestCardinalityTableModel.class).error(e);
-        }
         catch (URISyntaxException e) {
             Logger.getLogger(TestCardinalityTableModel.class).error(e);
         }
@@ -68,7 +65,7 @@ public class TestCardinalityTableModel extends TestCase {
     public void testFirst() {
         try {
             setup();
-            OWLClass margherita = mngr.getOWLDataFactory().getOWLClass(new URI(BASE_URI + "#" + "MargheritaPizza"));
+            OWLClass margherita = mngr.getOWLDataFactory().getOWLClass(IRI.create(BASE_URI + "#" + "MargheritaPizza"));
             model.setSubject(margherita);
             assert(model.getRowCount() == 2);
         }
