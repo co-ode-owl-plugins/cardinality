@@ -1,40 +1,29 @@
 package org.coode.cardinality.ui.roweditor;
 
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.swing.AbstractAction;
+import javax.swing.BorderFactory;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+import javax.swing.JToolBar;
+
 import org.protege.editor.owl.OWLEditorKit;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLDatatype;
-import org.semanticweb.owlapi.model.OWLTypedLiteral;
+import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.vocab.OWLFacet;
 import org.semanticweb.owlapi.vocab.XSDVocabulary;
-
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.util.HashMap;
-import java.util.Map;
-/*
-* Copyright (C) 2007, University of Manchester
-*
-* Modifications to the initial code base are copyright of their
-* respective authors, or their employers as appropriate.  Authorship
-* of the modifications may be determined from the ChangeLog placed at
-* the end of this file.
-*
-* This library is free software; you can redistribute it and/or
-* modify it under the terms of the GNU Lesser General Public
-* License as published by the Free Software Foundation; either
-* version 2.1 of the License, or (at your option) any later version.
-
-* This library is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-* Lesser General Public License for more details.
-
-* You should have received a copy of the GNU Lesser General Public
-* License along with this library; if not, write to the Free Software
-* Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-*/
 
 /**
  * Author: Nick Drummond<br>
@@ -109,13 +98,13 @@ public class DataRangeFacetPanel extends JPanel {
         return internalPanel;
     }
 
-    public Map<OWLFacet, OWLTypedLiteral> getFacetValueMap(OWLDatatype baseType) {
-        Map<OWLFacet, OWLTypedLiteral> results = new HashMap<OWLFacet, OWLTypedLiteral>();
+    public Map<OWLFacet, OWLLiteral> getFacetValueMap(OWLDatatype baseType) {
+        Map<OWLFacet, OWLLiteral> results = new HashMap<OWLFacet, OWLLiteral>();
         OWLDataFactory df = eKit.getModelManager().getOWLDataFactory();
         for (OWLFacet facet : componentMap.keySet()){
             final String valueStr = componentMap.get(facet).getText();
             if (valueStr != null && !valueStr.equals("")){
-                OWLTypedLiteral value = df.getOWLTypedLiteral(valueStr, getOWLDataTypeForFacet(facet, baseType));
+            	OWLLiteral value = df.getOWLLiteral(valueStr, getOWLDataTypeForFacet(facet, baseType));
                 results.put(facet, value);
             }
         }

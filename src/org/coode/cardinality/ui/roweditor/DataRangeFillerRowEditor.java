@@ -85,7 +85,7 @@ public class DataRangeFillerRowEditor extends CardinalityRowEditorPanel {
     protected OWLObject getSelectedFiller() {
         OWLDatatype baseType = rangeSelectorPanel.getSelectedDataType();
 
-        Map<OWLFacet, OWLTypedLiteral> facetMap = facetEditorPanel.getFacetValueMap(baseType);
+        Map<OWLFacet, OWLLiteral> facetMap = facetEditorPanel.getFacetValueMap(baseType);
         OWLDataFactory df = getOWLEditorKit().getModelManager().getOWLDataFactory();
         Set<OWLFacetRestriction> facetRestrs = new HashSet<OWLFacetRestriction>();
 
