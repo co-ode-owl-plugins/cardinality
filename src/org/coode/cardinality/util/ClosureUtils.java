@@ -1,9 +1,30 @@
 package org.coode.cardinality.util;
 
-import org.protege.editor.owl.model.OWLModelManager;
-import org.semanticweb.owlapi.model.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
-import java.util.*;
+import org.protege.editor.owl.model.OWLModelManager;
+import org.semanticweb.owlapi.model.AddAxiom;
+import org.semanticweb.owlapi.model.OWLAxiom;
+import org.semanticweb.owlapi.model.OWLClass;
+import org.semanticweb.owlapi.model.OWLClassExpression;
+import org.semanticweb.owlapi.model.OWLDataFactory;
+import org.semanticweb.owlapi.model.OWLObject;
+import org.semanticweb.owlapi.model.OWLObjectAllValuesFrom;
+import org.semanticweb.owlapi.model.OWLObjectProperty;
+import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
+import org.semanticweb.owlapi.model.OWLObjectUnionOf;
+import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyChange;
+import org.semanticweb.owlapi.model.OWLProperty;
+import org.semanticweb.owlapi.model.OWLRestriction;
+import org.semanticweb.owlapi.model.OWLSubClassOfAxiom;
+import org.semanticweb.owlapi.model.RemoveAxiom;
+import org.semanticweb.owlapi.search.EntitySearcher;
 
 /**
  * Author: drummond<br>
@@ -214,16 +235,13 @@ public class ClosureUtils {
     private Set<OWLClassExpression> getSuperclasses(OWLClass cls) {
         final Set<OWLClassExpression> superclasses = new HashSet<OWLClassExpression>();
         for (OWLOntology ont : mngr.getActiveOntologies()){
-            superclasses.addAll(cls.getSuperClasses(ont));
+            superclasses.addAll(EntitySearcher.getSuperClasses(cls, ont));
         }
         return superclasses;
     }
 
-    private Set<OWLClassExpression> getEquivalentClasses(OWLClass cls) {
-        final Set<OWLClassExpression> equivs = new HashSet<OWLClassExpression>();
-        for (OWLOntology ont : mngr.getActiveOntologies()){
-            equivs.addAll(cls.getEquivalentClasses(ont));
-        }
-        return equivs;
+    private Collection<OWLClassExpression> getEquivalentClasses(OWLClass cls) {
+        return EntitySearcher.getEquivalentClasses(cls,
+                mngr.getActiveOntologies());
     }
 }

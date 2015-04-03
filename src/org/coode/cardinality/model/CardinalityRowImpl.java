@@ -1,12 +1,32 @@
 package org.coode.cardinality.model;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import javax.swing.JOptionPane;
+
 import org.coode.cardinality.util.ClosureUtils;
 import org.coode.cardinality.util.RestrictionUtils;
 import org.protege.editor.owl.model.OWLModelManager;
-import org.semanticweb.owlapi.model.*;
-
-import javax.swing.*;
-import java.util.*;
+import org.semanticweb.owlapi.model.AddAxiom;
+import org.semanticweb.owlapi.model.OWLAxiom;
+import org.semanticweb.owlapi.model.OWLClass;
+import org.semanticweb.owlapi.model.OWLClassExpression;
+import org.semanticweb.owlapi.model.OWLDataFactory;
+import org.semanticweb.owlapi.model.OWLDataProperty;
+import org.semanticweb.owlapi.model.OWLObject;
+import org.semanticweb.owlapi.model.OWLObjectAllValuesFrom;
+import org.semanticweb.owlapi.model.OWLObjectProperty;
+import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyChange;
+import org.semanticweb.owlapi.model.OWLProperty;
+import org.semanticweb.owlapi.model.OWLSubClassOfAxiom;
+import org.semanticweb.owlapi.model.RemoveAxiom;
+import org.semanticweb.owlapi.search.EntitySearcher;
 
 /*
  * Copyright (C) 2007, University of Manchester
@@ -89,18 +109,20 @@ public class CardinalityRowImpl implements CardinalityRow {
         this.comparator = mngr.getOWLObjectComparator();
     }
 
+    @Override
     public void setFactory(CardinalityRowFactory factory) {
         this.factory = factory;
     }
 
+    @Override
     public void merge(CardinalityRow row) {
         int newMin = row.getMin();
-        if ((min < 0) || (newMin > min)) {
+        if (min < 0 || newMin > min) {
             min = newMin;
         }
 
         int newMax = row.getMax();
-        if ((newMax != RestrictionUtils.INFINITE) && ((max < 0) || (newMax <= max))) {
+        if (newMax != RestrictionUtils.INFINITE && (max < 0 || newMax <= max)) {
             max = newMax;
         }
 
@@ -110,14 +132,17 @@ public class CardinalityRowImpl implements CardinalityRow {
         editableRestrs.addAll(row.getEditableRestrictions());
     }
 
+    @Override
     public Set<OWLClassExpression> getEditableRestrictions() {
         return new HashSet<OWLClassExpression>(editableRestrs);
     }
 
+    @Override
     public Set<OWLClassExpression> getReadOnlyRestrictions() {
         return new HashSet<OWLClassExpression>(readonlyRestrs);
     }
 
+    @Override
     public void addRestriction(OWLClassExpression restr, boolean readOnly) {
         if (readOnly) {
             readonlyRestrs.add(restr);
@@ -127,6 +152,7 @@ public class CardinalityRowImpl implements CardinalityRow {
         }
     }
 
+    @Override
     public List<OWLOntologyChange> getDeleteChanges() {
         List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
 
@@ -141,6 +167,7 @@ public class CardinalityRowImpl implements CardinalityRow {
         return changes;
     }
 
+    @Override
     public List<OWLOntologyChange> getChanges() {
         List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
 
@@ -216,7 +243,7 @@ public class CardinalityRowImpl implements CardinalityRow {
         }
 
         if (removeOldClosureOnNewProp) { // removeRows old closure axioms along new prop
-            for (OWLObjectAllValuesFrom closure : closureUtils.getCandidateClosureAxioms(subject, (OWLObjectProperty)prop)) {
+            for (OWLObjectAllValuesFrom closure : closureUtils.getCandidateClosureAxioms(subject, prop)) {
                 OWLAxiom subclassAxiom = df.getOWLSubClassOfAxiom(subject, closure);
                 changes.addAll(getDeleteAxiomFromAllOntologies(subclassAxiom));
             }
@@ -240,38 +267,47 @@ public class CardinalityRowImpl implements CardinalityRow {
         return changes;
     }
 
+    @Override
     public OWLClass getSubject() {
         return subject;
     }
 
+    @Override
     public OWLProperty getProperty() {
         return prop;
     }
 
+    @Override
     public OWLObject getFiller() {
         return filler;
     }
 
+    @Override
     public int getMin() {
         return min;
     }
 
+    @Override
     public int getMax() {
         return max;
     }
 
+    @Override
     public boolean isClosed() {
         return closed;
     }
 
+    @Override
     public boolean isReadOnly() {
         return editableRestrs.isEmpty();
     }
 
+    @Override
     public boolean contains(OWLClassExpression restr) {
         return editableRestrs.contains(restr) || readonlyRestrs.contains(restr);
     }
 
+    @Override
     public void setProperty(OWLProperty property) {
         if (property != prop) {
             boolean update = true;
@@ -303,11 +339,13 @@ public class CardinalityRowImpl implements CardinalityRow {
         }
     }
 
+    @Override
     public void setFiller(OWLObject filler) {
         this.filler = filler;
         changed = true;
     }
 
+    @Override
     public void setMin(int newMin) {
 
         boolean update = true;
@@ -333,6 +371,7 @@ public class CardinalityRowImpl implements CardinalityRow {
         }
     }
 
+    @Override
     public void setMax(int newMax) {
 
         boolean update = true;
@@ -342,7 +381,7 @@ public class CardinalityRowImpl implements CardinalityRow {
                 switch (JOptionPane.showConfirmDialog(null, CLEAR_MAX_CONFIRM)) {
                     case JOptionPane.YES_OPTION:
                         newMax = CardinalityRow.NO_VALUE;
-                        update = (max != newMax);
+                        update = max != newMax;
                         break;
                     case JOptionPane.NO_OPTION:
                         // just allow the change to happen
@@ -359,11 +398,13 @@ public class CardinalityRowImpl implements CardinalityRow {
         }
     }
 
+    @Override
     public void setClosed(boolean closed) {
         this.closed = closed;
         changed = true;
     }
 
+    @Override
     public int compareTo(Object o) {
         int result;
 
@@ -386,12 +427,16 @@ public class CardinalityRowImpl implements CardinalityRow {
 
     private boolean isTransitive(OWLProperty property) {
         if (property instanceof OWLObjectProperty){
-            for (OWLOntology ont : mngr.getActiveOntologies()){
-                if (((OWLObjectProperty)property).isTransitive(ont)){
-                    return true;
+            return isTransitive((OWLObjectProperty) property);
                 }
+        return isTransitive((OWLDataProperty) property);
             }
+    private boolean isTransitive(OWLObjectProperty property) {
+        return EntitySearcher
+                .isTransitive(property, mngr.getActiveOntologies());
         }
+
+    private boolean isTransitive(OWLDataProperty property) {
         return false;
     }
 

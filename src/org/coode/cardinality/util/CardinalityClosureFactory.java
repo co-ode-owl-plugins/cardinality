@@ -1,9 +1,16 @@
 package org.coode.cardinality.util;
 
-import org.protege.editor.owl.model.util.ClosureAxiomFactory;
-import org.semanticweb.owlapi.model.*;
-
 import java.util.Set;
+
+import org.protege.editor.owl.model.util.ObjectSomeValuesFromFillerExtractor;
+import org.semanticweb.owlapi.model.OWLClassExpression;
+import org.semanticweb.owlapi.model.OWLDataFactory;
+import org.semanticweb.owlapi.model.OWLObjectAllValuesFrom;
+import org.semanticweb.owlapi.model.OWLObjectCardinalityRestriction;
+import org.semanticweb.owlapi.model.OWLObjectExactCardinality;
+import org.semanticweb.owlapi.model.OWLObjectMinCardinality;
+import org.semanticweb.owlapi.model.OWLObjectProperty;
+import org.semanticweb.owlapi.model.OWLOntology;
 
 /**
  * Author: drummond<br>
@@ -17,18 +24,39 @@ import java.util.Set;
  * Extended version of the ClosureAxiomFactory that also counts qualified cardinality
  * restrictions
  */
-public class CardinalityClosureFactory extends ClosureAxiomFactory {
+public class CardinalityClosureFactory extends
+        ObjectSomeValuesFromFillerExtractor {
 
-    public CardinalityClosureFactory(OWLObjectProperty objectProperty, OWLDataFactory owlDataFactory, Set<OWLOntology> ontologies) {
-        super(objectProperty, owlDataFactory, ontologies);
+    protected OWLDataFactory df;
+
+    public OWLObjectAllValuesFrom getClosureRestriction() {
+        Set<OWLClassExpression> descriptions = getFillers();
+        if (descriptions.isEmpty()) {
+            return null;
+        } else {
+            if (descriptions.size() == 1) {
+                return df.getOWLObjectAllValuesFrom(getObjectProperty(),
+                        descriptions.iterator().next());
+            } else {
+                return df.getOWLObjectAllValuesFrom(getObjectProperty(),
+                        df.getOWLObjectUnionOf(descriptions));
+            }
+        }
     }
 
+    public CardinalityClosureFactory(OWLObjectProperty objectProperty, OWLDataFactory owlDataFactory, Set<OWLOntology> ontologies) {
+        super(owlDataFactory, objectProperty);
+        df = owlDataFactory;
+    }
+
+    @Override
     public void visit(OWLObjectMinCardinality restr) {
         if (restr.getCardinality() > 0){
             accumulate(restr);
         }
     }
 
+    @Override
     public void visit(OWLObjectExactCardinality restr) {
         if (restr.getCardinality() > 0){
             accumulate(restr);
@@ -37,7 +65,7 @@ public class CardinalityClosureFactory extends ClosureAxiomFactory {
 
     private void accumulate(OWLObjectCardinalityRestriction restr){
         OWLClassExpression filler = restr.getFiller();
-        if (!filler.equals(owlDataFactory.getOWLThing())) {
+        if (!filler.isOWLThing()) {
             fillers.add(filler);
         }
     }

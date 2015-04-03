@@ -29,6 +29,7 @@ public class OWLLiteralCellEditor extends DefaultCellEditor {
         this.mngr = mngr;
     }
 
+    @Override
     public Component getTableCellEditorComponent(JTable jTable, Object object, boolean b, int i, int i1) {
     	OWLLiteral literal = (OWLLiteral) object;
         // retain the existing type or language
@@ -47,18 +48,22 @@ public class OWLLiteralCellEditor extends DefaultCellEditor {
         return super.getTableCellEditorComponent(jTable, object, b, i, i1);
     }
 
+    @Override
     public Object getCellEditorValue() {
         Object value = super.getCellEditorValue();
         if (value != null){
             if (type != null){
-                value = mngr.getOWLDataFactory().getOWLTypedLiteral((String)value, type);
+                value = mngr.getOWLDataFactory().getOWLLiteral((String) value,
+                        type);
             }
             else{
                 if (lang != null){
-                    value = mngr.getOWLDataFactory().getOWLStringLiteral((String)value, lang);
+                    value = mngr.getOWLDataFactory().getOWLLiteral(
+                            (String) value, lang);
                 }
                 else{
-                    value = mngr.getOWLDataFactory().getOWLStringLiteral((String)value);
+                    value = mngr.getOWLDataFactory().getOWLLiteral(
+                            (String) value);
                 }
             }
         }
