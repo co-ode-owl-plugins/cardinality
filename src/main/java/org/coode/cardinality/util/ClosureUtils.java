@@ -3,7 +3,6 @@ package org.coode.cardinality.util;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -68,21 +67,22 @@ public class ClosureUtils {
                         results.add(restr);
                     }
                     else if (filler instanceof OWLObjectUnionOf) {
-                        boolean allNamed = true;
-                        Iterator ops = ((OWLObjectUnionOf) filler).getOperands().iterator();
-                        while (ops.hasNext() && allNamed) {
-                            if (!(ops.next() instanceof OWLClass)) {
-                                allNamed = false;
-                            }
-                        }
-                        if (allNamed) {
-                            results.add(restr);
-                        }
+                        addIfAllNamed(results, restr, filler);
                     }
                 }
             }
         }
         return results;
+    }
+
+    protected void addIfAllNamed(Collection<OWLObjectAllValuesFrom> results,
+            OWLObjectAllValuesFrom restr, OWLClassExpression filler) {
+        for (OWLClassExpression next: ((OWLObjectUnionOf) filler).getOperands()) {
+            if (next.isAnonymous()) {
+                return;
+            }
+        }
+        results.add(restr);
     }
 
     /**

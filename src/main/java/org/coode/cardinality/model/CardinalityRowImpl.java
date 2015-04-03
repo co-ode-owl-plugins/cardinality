@@ -405,10 +405,8 @@ public class CardinalityRowImpl implements CardinalityRow {
     }
 
     @Override
-    public int compareTo(Object o) {
+    public int compareTo(CardinalityRow other) {
         int result;
-
-        CardinalityRow other = (CardinalityRow) o;
 
         Boolean thisReadOnly = isReadOnly();
         Boolean otherReadOnly = other.isReadOnly();

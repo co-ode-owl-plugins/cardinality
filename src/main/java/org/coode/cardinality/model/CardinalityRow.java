@@ -1,9 +1,13 @@
 package org.coode.cardinality.model;
 
-import org.semanticweb.owlapi.model.*;
-
 import java.util.List;
 import java.util.Set;
+
+import org.semanticweb.owlapi.model.OWLClass;
+import org.semanticweb.owlapi.model.OWLClassExpression;
+import org.semanticweb.owlapi.model.OWLObject;
+import org.semanticweb.owlapi.model.OWLOntologyChange;
+import org.semanticweb.owlapi.model.OWLProperty;
 
 /*
  * Copyright (C) 2007, University of Manchester
@@ -39,7 +43,7 @@ import java.util.Set;
  * <p/>
  * When using the term "Restriction" we mean any OWL restriction OR any negated object some restriction
  */
-public interface CardinalityRow extends Comparable, Mergeable<CardinalityRow> {
+public interface CardinalityRow extends Comparable<CardinalityRow>, Mergeable<CardinalityRow> {
 
     int NO_VALUE = -1;
 

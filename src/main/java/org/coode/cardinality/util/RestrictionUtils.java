@@ -37,7 +37,7 @@ public class RestrictionUtils {
      * @return the filler of the restriction (cardi will be qualified)
      */
     public static OWLObject getOWLFiller(OWLClassExpression owlRestr) {
-        return new FillerFinder().getFiller(owlRestr);
+        return owlRestr.accept(new FillerFinder());
     }
 
     /**
