@@ -12,16 +12,19 @@ import org.semanticweb.owlapi.model.OWLLiteral;
 
 /**
  * Author: Nick Drummond<br>
- * http://www.cs.man.ac.uk/~drummond/<br><br>
+ * http://www.cs.man.ac.uk/~drummond/<br>
+ * <br>
  * <p/>
  * The University Of Manchester<br>
  * Bio Health Informatics Group<br>
- * Date: Sep 7, 2007<br><br>
+ * Date: Sep 7, 2007<br>
+ * <br>
  */
 public class OWLLiteralCellEditor extends DefaultCellEditor {
-	private static final long serialVersionUID = 3520275622320178920L;
-	private OWLDatatype type;
-    private OWLModelManager mngr;
+
+    private static final long serialVersionUID = 3520275622320178920L;
+    private OWLDatatype type;
+    private final OWLModelManager mngr;
     private String lang;
 
     public OWLLiteralCellEditor(JTextField jTextField, OWLModelManager mngr) {
@@ -30,40 +33,36 @@ public class OWLLiteralCellEditor extends DefaultCellEditor {
     }
 
     @Override
-    public Component getTableCellEditorComponent(JTable jTable, Object object, boolean b, int i, int i1) {
-    	OWLLiteral literal = (OWLLiteral) object;
+    public Component getTableCellEditorComponent(JTable jTable, Object object,
+            boolean b, int i, int i1) {
+        OWLLiteral literal = (OWLLiteral) object;
         // retain the existing type or language
-        if (!literal.hasLang()){
+        if (!literal.hasLang()) {
             type = literal.getDatatype();
             lang = null;
-        }
-        else{
+        } else {
             type = null;
             lang = literal.getLang();
         }
-
         // unwrap the literal from the constant for editing
         object = literal.getLiteral();
-
         return super.getTableCellEditorComponent(jTable, object, b, i, i1);
     }
 
     @Override
     public Object getCellEditorValue() {
         Object value = super.getCellEditorValue();
-        if (value != null){
-            if (type != null){
+        if (value != null) {
+            if (type != null) {
                 value = mngr.getOWLDataFactory().getOWLLiteral((String) value,
                         type);
-            }
-            else{
-                if (lang != null){
-                    value = mngr.getOWLDataFactory().getOWLLiteral(
-                            (String) value, lang);
-                }
-                else{
-                    value = mngr.getOWLDataFactory().getOWLLiteral(
-                            (String) value);
+            } else {
+                if (lang != null) {
+                    value = mngr.getOWLDataFactory()
+                            .getOWLLiteral((String) value, lang);
+                } else {
+                    value = mngr.getOWLDataFactory()
+                            .getOWLLiteral((String) value);
                 }
             }
         }

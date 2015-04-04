@@ -1,5 +1,17 @@
 package org.coode.cardinality.ui.celleditor;
 
+import java.awt.Component;
+import java.awt.Font;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
+import java.util.EventObject;
+
+import javax.swing.AbstractCellEditor;
+import javax.swing.BorderFactory;
+import javax.swing.JTable;
+import javax.swing.table.TableCellEditor;
+
 import org.apache.log4j.Logger;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.model.OWLModelManager;
@@ -7,14 +19,6 @@ import org.protege.editor.owl.ui.clsdescriptioneditor.ExpressionEditor;
 import org.protege.editor.owl.ui.clsdescriptioneditor.OWLExpressionCheckerFactory;
 import org.semanticweb.owlapi.model.OWLClassExpression;
 import org.semanticweb.owlapi.model.OWLException;
-
-import javax.swing.*;
-import javax.swing.table.TableCellEditor;
-import java.awt.*;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseEvent;
-import java.util.EventObject;
 
 /*
  * Copyright (C) 2007, University of Manchester
@@ -38,34 +42,37 @@ import java.util.EventObject;
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-
 /**
  * Author: Nick Drummond<br>
  * nick.drummond@cs.manchester.ac.uk<br>
- * http://www.cs.man.ac.uk/~drummond<br><br>
+ * http://www.cs.man.ac.uk/~drummond<br>
+ * <br>
  * <p/>
  * The University Of Manchester<br>
  * Bio Health Informatics Group<br>
- * Date: Aug 30, 2006<br><br>
+ * Date: Aug 30, 2006<br>
+ * <br>
  * <p/>
  */
-public class OWLClassExpressionCellEditor extends AbstractCellEditor implements TableCellEditor {
+public class OWLClassExpressionCellEditor extends AbstractCellEditor
+        implements TableCellEditor {
+    private static final long serialVersionUID = 1L;
 
-    private OWLModelManager owlModelManager;
-
-    private ExpressionEditor<OWLClassExpression> owlDescriptionEditor;
-
+    private final OWLModelManager owlModelManager;
+    private final ExpressionEditor<OWLClassExpression> owlDescriptionEditor;
     private boolean expandable;
-
     public static final int EXPANDABLE_ROW_HEIGHT = 45;
 
     public OWLClassExpressionCellEditor(OWLEditorKit eKit) {
         owlModelManager = eKit.getModelManager();
-        
-        final OWLExpressionCheckerFactory fac = owlModelManager.getOWLExpressionCheckerFactory();
-        owlDescriptionEditor = new ExpressionEditor<OWLClassExpression>(eKit, fac.getOWLClassExpressionChecker());
+        final OWLExpressionCheckerFactory fac = owlModelManager
+                .getOWLExpressionCheckerFactory();
+        owlDescriptionEditor = new ExpressionEditor<>(eKit,
+                fac.getOWLClassExpressionChecker());
         owlDescriptionEditor.setOpaque(false);
         owlDescriptionEditor.addKeyListener(new KeyAdapter() {
+
+            @Override
             public void keyPressed(KeyEvent e) {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     if (!e.isConsumed()) {
@@ -82,14 +89,16 @@ public class OWLClassExpressionCellEditor extends AbstractCellEditor implements 
             }
         });
         expandable = false;
-        owlDescriptionEditor.setFont(owlDescriptionEditor.getFont().deriveFont(Font.PLAIN, 12.0f));
+        owlDescriptionEditor.setFont(
+                owlDescriptionEditor.getFont().deriveFont(Font.PLAIN, 12.0f));
     }
 
     /**
-     * Makes the cell clsdescriptioneditor expandable.  If the cell clsdescriptioneditor is
-     * expandable, then the the table
-     * row that contains the cell being edited is expanded to give
-     * the user a few lines to edit the expression.
+     * Makes the cell clsdescriptioneditor expandable. If the cell
+     * clsdescriptioneditor is expandable, then the the table row that contains
+     * the cell being edited is expanded to give the user a few lines to edit
+     * the expression.
+     * 
      * @param expandable
      */
     public void setExpandable(boolean expandable) {
@@ -97,40 +106,42 @@ public class OWLClassExpressionCellEditor extends AbstractCellEditor implements 
     }
 
     public void setEditorIndentation(int editorIndentation) {
-        owlDescriptionEditor.setBorder(BorderFactory.createEmptyBorder(0, editorIndentation, 0, 0));
+        owlDescriptionEditor.setBorder(
+                BorderFactory.createEmptyBorder(0, editorIndentation, 0, 0));
     }
 
+    @Override
     public Object getCellEditorValue() {
         OWLClassExpression descr = null;
         try {
             descr = owlDescriptionEditor.createObject();
-        }
-        catch (OWLException e) {
-            Logger.getLogger(OWLClassExpressionCellEditor.class).error(e.getMessage());
+        } catch (OWLException e) {
+            Logger.getLogger(OWLClassExpressionCellEditor.class)
+                    .error(e.getMessage());
         }
         return descr;
     }
 
-    public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
+    @Override
+    public Component getTableCellEditorComponent(JTable table, Object value,
+            boolean isSelected, int row, int column) {
         if (expandable) {
             table.setRowHeight(row, EXPANDABLE_ROW_HEIGHT);
         }
-
         OWLClassExpression desc = (OWLClassExpression) value;
         if (desc != null) {
             owlDescriptionEditor.setText(owlModelManager.getRendering(desc));
-        }
-        else {
+        } else {
             owlDescriptionEditor.setText("");
         }
         return owlDescriptionEditor;
     }
 
+    @Override
     public boolean isCellEditable(EventObject eventObject) {
         if (eventObject instanceof MouseEvent) {
             return ((MouseEvent) eventObject).getClickCount() >= 2;
-        }
-        else {
+        } else {
             return super.isCellEditable(eventObject);
         }
     }

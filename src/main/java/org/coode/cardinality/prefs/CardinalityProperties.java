@@ -1,9 +1,9 @@
 package org.coode.cardinality.prefs;
 
-import org.apache.log4j.Logger;
-
 import java.io.IOException;
 import java.util.Properties;
+
+import org.apache.log4j.Logger;
 
 /*
  * Copyright (C) 2007, University of Manchester
@@ -27,30 +27,31 @@ import java.util.Properties;
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-
 /**
  * Author: Nick Drummond<br>
  * nick.drummond@cs.manchester.ac.uk<br>
- * http://www.cs.man.ac.uk/~drummond<br><br>
+ * http://www.cs.man.ac.uk/~drummond<br>
+ * <br>
  * <p/>
  * The University Of Manchester<br>
  * Bio Health Informatics Group<br>
- * Date: Aug 30, 2006<br><br>
+ * Date: Aug 30, 2006<br>
+ * <br>
  * <p/>
  */
 public class CardinalityProperties extends Properties {
+    private static final long serialVersionUID = 1L;
 
     private static final String PROPS_FILENAME = "resources/cardinality.properties";
-    
     private static CardinalityProperties instance;
 
     public static CardinalityProperties getInstance() {
         if (instance == null) {
             instance = new CardinalityProperties();
             try {
-                instance.load(instance.getClass().getClassLoader().getResourceAsStream(PROPS_FILENAME));
-            }
-            catch (IOException e) {
+                instance.load(instance.getClass().getClassLoader()
+                        .getResourceAsStream(PROPS_FILENAME));
+            } catch (IOException e) {
                 Logger.getLogger(CardinalityProperties.class).error(e);
             }
         }

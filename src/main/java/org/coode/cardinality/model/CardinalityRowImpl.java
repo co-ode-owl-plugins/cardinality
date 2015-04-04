@@ -17,7 +17,6 @@ import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLClassExpression;
 import org.semanticweb.owlapi.model.OWLDataFactory;
-import org.semanticweb.owlapi.model.OWLDataProperty;
 import org.semanticweb.owlapi.model.OWLObject;
 import org.semanticweb.owlapi.model.OWLObjectAllValuesFrom;
 import org.semanticweb.owlapi.model.OWLObjectProperty;
@@ -50,63 +49,56 @@ import org.semanticweb.owlapi.search.EntitySearcher;
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-
 /**
  * Author: Nick Drummond<br>
  * nick.drummond@cs.manchester.ac.uk<br>
- * http://www.cs.man.ac.uk/~drummond<br><br>
+ * http://www.cs.man.ac.uk/~drummond<br>
+ * <br>
  * <p/>
  * The University Of Manchester<br>
  * Bio Health Informatics Group<br>
- * Date: Aug 30, 2006<br><br>
+ * Date: Aug 30, 2006<br>
+ * <br>
  * <p/>
  */
 public class CardinalityRowImpl implements CardinalityRow {
 
     private static final String CLEAR_MAX_CONFIRM = "Transitive properties cannot have a max cardi of anything but 0. Clear the max value?";
     private static final String TRANS_MIN_CONFIRM = "Transitive properties cannot have a min cardi of anything but 0 or 1. Set the min value to 1?";
-
     protected final OWLClass subject;
-    protected OWLObject filler; // cannot be immutable as may need to be specialised
-    protected OWLProperty prop; // cannot be immutable as may need to be specialised
+    protected OWLObject filler; // cannot be immutable as may need to be
+                                // specialised
+    protected OWLProperty prop; // cannot be immutable as may need to be
+                                // specialised
     protected int min;
     protected int max;
     private boolean closed;
-
     private final OWLObject originalFiller;
     private final OWLProperty originalProperty; // immutable
     private final boolean originallyClosed; // immutable
-
-    protected final Collection<OWLClassExpression> editableRestrs = new ArrayList<OWLClassExpression>();
-
-    protected final Collection<OWLClassExpression> readonlyRestrs = new ArrayList<OWLClassExpression>();
-
+    protected final Collection<OWLClassExpression> editableRestrs = new ArrayList<>();
+    protected final Collection<OWLClassExpression> readonlyRestrs = new ArrayList<>();
     protected final OWLModelManager mngr;
-
-    private ClosureUtils closureUtils;
-
+    private final ClosureUtils closureUtils;
     private CardinalityRowFactory factory;
-
     protected final Comparator<OWLObject> comparator;
-
     private boolean changed = false;
 
-    public CardinalityRowImpl(OWLClass subject, OWLProperty objProp, OWLObject filler,
-                              int min, int max, boolean closed, OWLModelManager mngr) {
+    public CardinalityRowImpl(OWLClass subject, OWLProperty objProp,
+            OWLObject filler, int min, int max, boolean closed,
+            OWLModelManager mngr) {
         this.subject = subject;
         this.filler = filler;
-        this.prop = objProp;
+        prop = objProp;
         this.min = min;
         this.max = max;
         this.closed = closed;
-
-        this.originalFiller = filler;
-        this.originalProperty = objProp;
-        this.originallyClosed = closed;
-
+        originalFiller = filler;
+        originalProperty = objProp;
+        originallyClosed = closed;
         this.mngr = mngr;
         closureUtils = new ClosureUtils(mngr);
-        this.comparator = mngr.getOWLObjectComparator();
+        comparator = mngr.getOWLObjectComparator();
     }
 
     @Override
@@ -120,73 +112,62 @@ public class CardinalityRowImpl implements CardinalityRow {
         if (min < 0 || newMin > min) {
             min = newMin;
         }
-
         int newMax = row.getMax();
         if (newMax != RestrictionUtils.INFINITE && (max < 0 || newMax <= max)) {
             max = newMax;
         }
-
-        //@@TODO sort out filler and property merges based on subsumption
-
+        // @@TODO sort out filler and property merges based on subsumption
         readonlyRestrs.addAll(row.getReadOnlyRestrictions());
         editableRestrs.addAll(row.getEditableRestrictions());
     }
 
     @Override
     public Set<OWLClassExpression> getEditableRestrictions() {
-        return new HashSet<OWLClassExpression>(editableRestrs);
+        return new HashSet<>(editableRestrs);
     }
 
     @Override
     public Set<OWLClassExpression> getReadOnlyRestrictions() {
-        return new HashSet<OWLClassExpression>(readonlyRestrs);
+        return new HashSet<>(readonlyRestrs);
     }
 
     @Override
     public void addRestriction(OWLClassExpression restr, boolean readOnly) {
         if (readOnly) {
             readonlyRestrs.add(restr);
-        }
-        else {
+        } else {
             editableRestrs.add(restr);
         }
     }
 
     @Override
     public List<OWLOntologyChange> getDeleteChanges() {
-        List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
-
+        List<OWLOntologyChange> changes = new ArrayList<>();
         final OWLDataFactory df = mngr.getOWLDataFactory();
-
         // removeRows all existing restrictions
         for (OWLClassExpression restr : editableRestrs) {
-            final OWLSubClassOfAxiom owlSubClassAxiom = df.getOWLSubClassOfAxiom(subject, restr);
+            final OWLSubClassOfAxiom owlSubClassAxiom = df
+                    .getOWLSubClassOfAxiom(subject, restr);
             changes.addAll(getDeleteAxiomFromAllOntologies(owlSubClassAxiom));
         }
-
         return changes;
     }
 
     @Override
     public List<OWLOntologyChange> getChanges() {
-        List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
-
+        List<OWLOntologyChange> changes = new ArrayList<>();
         if (changed) {
-
             final OWLDataFactory df = mngr.getOWLDataFactory();
-
             // removeRows all existing restrictions
             for (OWLClassExpression restr : editableRestrs) {
-                OWLAxiom subclassAxiom = df.getOWLSubClassOfAxiom(subject, restr);
+                OWLAxiom subclassAxiom = df.getOWLSubClassOfAxiom(subject,
+                        restr);
                 changes.addAll(getDeleteAxiomFromAllOntologies(subclassAxiom));
             }
-
             // @@TODO should really regenerate them in the correct place
             OWLOntology ont = mngr.getActiveOntology();
-
             changes.addAll(CardinalityRowFactory.toOWL(this, ont, df));
-
-            if (prop instanceof OWLObjectProperty){
+            if (prop instanceof OWLObjectProperty) {
                 changes.addAll(updateClosure());
             }
         }
@@ -194,74 +175,79 @@ public class CardinalityRowImpl implements CardinalityRow {
     }
 
     private List<OWLOntologyChange> updateClosure() {
-        // in reality, only one feature gets updated at once, which should work fine
-        // but this should also handle the cases where multiple features have been changed before a commit
+        // in reality, only one feature gets updated at once, which should work
+        // fine
+        // but this should also handle the cases where multiple features have
+        // been changed before a commit
         // this really needs testing for all combinations
-
-        List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
-
+        List<OWLOntologyChange> changes = new ArrayList<>();
         boolean createNewClosureOnNewProp = false;
         boolean removeOldClosureOnOldProp = false;
         boolean createNewClosureOnOldProp = false;
         boolean removeOldClosureOnNewProp = false;
-
         if (closed) {
             if (!originallyClosed) {
                 removeOldClosureOnNewProp = true;
                 createNewClosureOnNewProp = true;
             }
-
             if (filler != originalFiller) {
                 removeOldClosureOnOldProp = true;
                 createNewClosureOnNewProp = true;
             }
-
             if (prop != originalProperty) {
                 removeOldClosureOnOldProp = true;
                 removeOldClosureOnNewProp = true;
                 createNewClosureOnOldProp = true;
                 createNewClosureOnNewProp = true;
             }
-        }
-        else { // not closed
+        } else { // not closed
             if (originallyClosed) {
                 removeOldClosureOnOldProp = true;
             }
             if (prop != originalProperty) {
-                //removeOldClosureOnNewProp = true; // arguably the user should notice the highlighting
+                // removeOldClosureOnNewProp = true; // arguably the user should
+                // notice the highlighting
             }
         }
-
         OWLDataFactory df = mngr.getOWLDataFactory();
-
         if (removeOldClosureOnOldProp) { // removeRows old closure on old prop
-            OWLObjectAllValuesFrom oldClosure = closureUtils.getClosureAxiom(subject, (OWLObjectProperty)originalProperty, originalFiller);
+            OWLObjectAllValuesFrom oldClosure = closureUtils.getClosureAxiom(
+                    subject, (OWLObjectProperty) originalProperty,
+                    originalFiller);
             if (oldClosure != null) {
-                OWLAxiom subclassAxiom = df.getOWLSubClassOfAxiom(subject, oldClosure);
+                OWLAxiom subclassAxiom = df.getOWLSubClassOfAxiom(subject,
+                        oldClosure);
                 changes.addAll(getDeleteAxiomFromAllOntologies(subclassAxiom));
             }
         }
-
-        if (removeOldClosureOnNewProp) { // removeRows old closure axioms along new prop
-            for (OWLObjectAllValuesFrom closure : closureUtils.getCandidateClosureAxioms(subject, prop)) {
-                OWLAxiom subclassAxiom = df.getOWLSubClassOfAxiom(subject, closure);
+        if (removeOldClosureOnNewProp) { // removeRows old closure axioms along
+                                         // new prop
+            for (OWLObjectAllValuesFrom closure : closureUtils
+                    .getCandidateClosureAxioms(subject, prop)) {
+                OWLAxiom subclassAxiom = df.getOWLSubClassOfAxiom(subject,
+                        closure);
                 changes.addAll(getDeleteAxiomFromAllOntologies(subclassAxiom));
             }
         }
-
         if (createNewClosureOnNewProp) { // create new closure on new prop
-            Set<OWLClassExpression> fillers = factory.getFillers((OWLObjectProperty)prop);
+            Set<OWLClassExpression> fillers = factory
+                    .getFillers((OWLObjectProperty) prop);
             if (!fillers.isEmpty()) {
-                OWLObjectAllValuesFrom newClosure = closureUtils.createClosureAxiom((OWLObjectProperty)prop, fillers);
-                changes.add(new AddAxiom(mngr.getActiveOntology(), df.getOWLSubClassOfAxiom(subject, newClosure)));
+                OWLObjectAllValuesFrom newClosure = closureUtils
+                        .createClosureAxiom((OWLObjectProperty) prop, fillers);
+                changes.add(new AddAxiom(mngr.getActiveOntology(),
+                        df.getOWLSubClassOfAxiom(subject, newClosure)));
             }
         }
-
         if (createNewClosureOnOldProp) { // create new closure on old prop
-            Set<OWLClassExpression> fillers = factory.getFillers((OWLObjectProperty)originalProperty);
+            Set<OWLClassExpression> fillers = factory
+                    .getFillers((OWLObjectProperty) originalProperty);
             if (!fillers.isEmpty()) {
-                OWLObjectAllValuesFrom newClosure = closureUtils.createClosureAxiom((OWLObjectProperty)originalProperty, fillers);
-                changes.add(new AddAxiom(mngr.getActiveOntology(), df.getOWLSubClassOfAxiom(subject, newClosure)));
+                OWLObjectAllValuesFrom newClosure = closureUtils
+                        .createClosureAxiom(
+                                (OWLObjectProperty) originalProperty, fillers);
+                changes.add(new AddAxiom(mngr.getActiveOntology(),
+                        df.getOWLSubClassOfAxiom(subject, newClosure)));
             }
         }
         return changes;
@@ -311,10 +297,11 @@ public class CardinalityRowImpl implements CardinalityRow {
     public void setProperty(OWLProperty property) {
         if (property != prop) {
             boolean update = true;
-
             if (isTransitive(property)) {
-                if (max > 0) { // warn that this must be cleared for transitive properties
-                    switch (JOptionPane.showConfirmDialog(null, CLEAR_MAX_CONFIRM)) {
+                if (max > 0) { // warn that this must be cleared for transitive
+                               // properties
+                    switch (JOptionPane.showConfirmDialog(null,
+                            CLEAR_MAX_CONFIRM)) {
                         case JOptionPane.YES_OPTION:
                             setMax(CardinalityRow.NO_VALUE);
                             break;
@@ -322,8 +309,10 @@ public class CardinalityRowImpl implements CardinalityRow {
                             update = false;
                     }
                 }
-                if (update && min > 1) { // warn that this must be cleared for transitive properties
-                    switch (JOptionPane.showConfirmDialog(null, TRANS_MIN_CONFIRM)) {
+                if (update && min > 1) { // warn that this must be cleared for
+                                         // transitive properties
+                    switch (JOptionPane.showConfirmDialog(null,
+                            TRANS_MIN_CONFIRM)) {
                         case JOptionPane.YES_OPTION:
                             setMin(1);
                             break;
@@ -333,7 +322,7 @@ public class CardinalityRowImpl implements CardinalityRow {
                 }
             }
             if (update) {
-                this.prop = property;
+                prop = property;
                 changed = true;
             }
         }
@@ -347,12 +336,11 @@ public class CardinalityRowImpl implements CardinalityRow {
 
     @Override
     public void setMin(int newMin) {
-
         boolean update = true;
-
         if (isTransitive(prop)) {
             if (newMin > 1) { // warn that max is 1 for transitive properties
-                switch (JOptionPane.showConfirmDialog(null, TRANS_MIN_CONFIRM)) {
+                switch (JOptionPane.showConfirmDialog(null,
+                        TRANS_MIN_CONFIRM)) {
                     case JOptionPane.YES_OPTION:
                         newMin = 1;
                         break;
@@ -364,21 +352,20 @@ public class CardinalityRowImpl implements CardinalityRow {
                 }
             }
         }
-
         if (update && newMin != min) {
-            this.min = newMin;
+            min = newMin;
             changed = true;
         }
     }
 
     @Override
     public void setMax(int newMax) {
-
         boolean update = true;
-
         if (isTransitive(prop)) {
-            if (newMax > 0) { // warn that this must be cleared for transitive properties
-                switch (JOptionPane.showConfirmDialog(null, CLEAR_MAX_CONFIRM)) {
+            if (newMax > 0) { // warn that this must be cleared for transitive
+                              // properties
+                switch (JOptionPane.showConfirmDialog(null,
+                        CLEAR_MAX_CONFIRM)) {
                     case JOptionPane.YES_OPTION:
                         newMax = CardinalityRow.NO_VALUE;
                         update = max != newMax;
@@ -391,9 +378,8 @@ public class CardinalityRowImpl implements CardinalityRow {
                 }
             }
         }
-
         if (update && newMax != max) {
-            this.max = newMax;
+            max = newMax;
             changed = true;
         }
     }
@@ -407,41 +393,35 @@ public class CardinalityRowImpl implements CardinalityRow {
     @Override
     public int compareTo(CardinalityRow other) {
         int result;
-
         Boolean thisReadOnly = isReadOnly();
         Boolean otherReadOnly = other.isReadOnly();
         result = thisReadOnly.compareTo(otherReadOnly);
-
         if (result == 0) {
             result = comparator.compare(prop, other.getProperty());
             if (result == 0) {
                 result = comparator.compare(filler, other.getFiller());
             }
         }
-
         return result;
     }
 
-
     private boolean isTransitive(OWLProperty property) {
-        if (property instanceof OWLObjectProperty){
-            return isTransitive((OWLObjectProperty) property);
-                }
-        return isTransitive((OWLDataProperty) property);
-            }
-    private boolean isTransitive(OWLObjectProperty property) {
-        return EntitySearcher
-                .isTransitive(property, mngr.getActiveOntologies());
+        if (property.isOWLObjectProperty()) {
+            return isTransitive(property.asOWLObjectProperty());
         }
-
-    private boolean isTransitive(OWLDataProperty property) {
         return false;
     }
 
-    private List<OWLOntologyChange> getDeleteAxiomFromAllOntologies(OWLAxiom axiom){
-        List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
-        for (OWLOntology ont : mngr.getActiveOntologies()){
-            if (ont.containsAxiom(axiom)){
+    private boolean isTransitive(OWLObjectProperty property) {
+        return EntitySearcher.isTransitive(property,
+                mngr.getActiveOntologies());
+    }
+
+    private List<OWLOntologyChange>
+            getDeleteAxiomFromAllOntologies(OWLAxiom axiom) {
+        List<OWLOntologyChange> changes = new ArrayList<>();
+        for (OWLOntology ont : mngr.getActiveOntologies()) {
+            if (ont.containsAxiom(axiom)) {
                 changes.add(new RemoveAxiom(ont, axiom));
             }
         }

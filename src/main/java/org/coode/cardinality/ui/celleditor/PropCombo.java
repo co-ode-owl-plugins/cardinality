@@ -1,17 +1,22 @@
 package org.coode.cardinality.ui.celleditor;
 
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+
+import javax.swing.JComboBox;
+
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.model.OWLModelManager;
 import org.protege.editor.owl.model.event.EventType;
 import org.protege.editor.owl.model.event.OWLModelManagerChangeEvent;
 import org.protege.editor.owl.model.event.OWLModelManagerListener;
 import org.protege.editor.owl.ui.renderer.OWLCellRenderer;
-import org.semanticweb.owlapi.model.*;
-
-import javax.swing.*;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
+import org.semanticweb.owlapi.model.OWLAxiom;
+import org.semanticweb.owlapi.model.OWLDeclarationAxiom;
+import org.semanticweb.owlapi.model.OWLOntologyChange;
+import org.semanticweb.owlapi.model.OWLOntologyChangeListener;
+import org.semanticweb.owlapi.model.OWLProperty;
 
 /*
  * Copyright (C) 2007, University of Manchester
@@ -35,67 +40,68 @@ import java.util.List;
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-
 /**
  * Author: Nick Drummond<br>
  * nick.drummond@cs.manchester.ac.uk<br>
- * http://www.cs.man.ac.uk/~drummond<br><br>
+ * http://www.cs.man.ac.uk/~drummond<br>
+ * <br>
  * <p/>
  * The University Of Manchester<br>
  * Bio Health Informatics Group<br>
- * Date: Aug 30, 2006<br><br>
+ * Date: Aug 30, 2006<br>
+ * <br>
  * <p/>
  */
-public class PropCombo extends JComboBox {
+public class PropCombo extends JComboBox<OWLProperty> {
+    private static final long serialVersionUID = 1L;
 
     private OWLModelManager mngr;
-
-    private boolean changesMade = false;
-
+    protected boolean changesMade = false;
     public static final int OBJ_PROPS = 0;
     public static final int DATA_PROPS = 1;
-
-    private int type;
-
+    private final int type;
     private OWLOntologyChangeListener ontologyChangeListener = new OWLOntologyChangeListener() {
-        public void ontologiesChanged(List<? extends OWLOntologyChange> list) throws OWLException {
-            for (OWLOntologyChange ontologyChange : list){
+
+        @Override
+        public void ontologiesChanged(List<? extends OWLOntologyChange> list) {
+            for (OWLOntologyChange ontologyChange : list) {
                 final OWLAxiom axiom = ontologyChange.getAxiom();
-                if (axiom instanceof OWLDeclarationAxiom &&
-                        ((OWLDeclarationAxiom)axiom).getEntity() instanceof OWLProperty){
+                if (axiom instanceof OWLDeclarationAxiom
+                        && ((OWLDeclarationAxiom) axiom)
+                                .getEntity() instanceof OWLProperty) {
                     changesMade = true;
                 }
             }
         }
     };
-
     // listen to whether the currently active ontology has changed
     private OWLModelManagerListener activeOntologyListener = new OWLModelManagerListener() {
+
+        @Override
         public void handleChange(OWLModelManagerChangeEvent event) {
-            if (event.getType() == EventType.ACTIVE_ONTOLOGY_CHANGED ||
-                event.getType() == EventType.ONTOLOGY_VISIBILITY_CHANGED) {
+            if (event.getType() == EventType.ACTIVE_ONTOLOGY_CHANGED || event
+                    .getType() == EventType.ONTOLOGY_VISIBILITY_CHANGED) {
                 reload();
             }
         }
     };
 
+    /**
+     * @param eKit editor kit
+     * @param type type index
+     */
     public PropCombo(OWLEditorKit eKit, int type) {
         super();
-
         this.type = type;
-
         mngr = eKit.getModelManager();
-
         setRenderer(new OWLCellRenderer(eKit));
-
         // deal with adding and removing object properties
         mngr.addOntologyChangeListener(ontologyChangeListener);
-
         mngr.addListener(activeOntologyListener);
-
         load();
     }
 
+    @Override
     public void setPopupVisible(boolean v) {
         if (changesMade) {
             reload();
@@ -104,18 +110,19 @@ public class PropCombo extends JComboBox {
         super.setPopupVisible(v);
     }
 
-    private void reload() {
+    protected void reload() {
         removeAllItems();
         load();
     }
 
     private void load() {
         List<OWLProperty> props;
-        if (type == OBJ_PROPS){
-            props = new LinkedList<OWLProperty>(mngr.getActiveOntology().getObjectPropertiesInSignature());
-        }
-        else{
-            props = new LinkedList<OWLProperty>(mngr.getActiveOntology().getDataPropertiesInSignature());
+        if (type == OBJ_PROPS) {
+            props = new LinkedList<OWLProperty>(
+                    mngr.getActiveOntology().getObjectPropertiesInSignature());
+        } else {
+            props = new LinkedList<OWLProperty>(
+                    mngr.getActiveOntology().getDataPropertiesInSignature());
         }
         Collections.sort(props, mngr.getOWLObjectComparator());
         addItems(props);
@@ -124,11 +131,14 @@ public class PropCombo extends JComboBox {
     private void addItems(List<? extends OWLProperty> properties) {
         if (properties != null) {
             for (OWLProperty prop : properties) {
-                    addItem(prop);
+                addItem(prop);
             }
         }
     }
 
+    /**
+     * Remove all listeners.
+     */
     public void dispose() {
         mngr.removeOntologyChangeListener(ontologyChangeListener);
         mngr.removeListener(activeOntologyListener);

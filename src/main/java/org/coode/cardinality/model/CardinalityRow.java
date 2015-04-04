@@ -31,19 +31,22 @@ import org.semanticweb.owlapi.model.OWLProperty;
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-
 /**
  * Author: Nick Drummond<br>
  * nick.drummond@cs.manchester.ac.uk<br>
- * http://www.cs.man.ac.uk/~drummond<br><br>
+ * http://www.cs.man.ac.uk/~drummond<br>
+ * <br>
  * <p/>
  * The University Of Manchester<br>
  * Bio Health Informatics Group<br>
- * Date: Aug 30, 2006<br><br>
+ * Date: Aug 30, 2006<br>
+ * <br>
  * <p/>
- * When using the term "Restriction" we mean any OWL restriction OR any negated object some restriction
+ * When using the term "Restriction" we mean any OWL restriction OR any negated
+ * object some restriction
  */
-public interface CardinalityRow extends Comparable<CardinalityRow>, Mergeable<CardinalityRow> {
+public interface CardinalityRow
+        extends Comparable<CardinalityRow>, Mergeable<CardinalityRow> {
 
     int NO_VALUE = -1;
 
@@ -55,9 +58,8 @@ public interface CardinalityRow extends Comparable<CardinalityRow>, Mergeable<Ca
 
     List<OWLOntologyChange> getChanges();
 
-//////////////// getters
-
-    OWLClass getSubject();
+    //////////////// getters
+            OWLClass getSubject();
 
     OWLProperty getProperty();
 
@@ -76,14 +78,13 @@ public interface CardinalityRow extends Comparable<CardinalityRow>, Mergeable<Ca
     Set<OWLClassExpression> getEditableRestrictions();
 
     Set<OWLClassExpression> getReadOnlyRestrictions();
+            // boolean isMinReadOnly();
+            //
+            // boolean isMaxReadOnly();
 
-//    boolean isMinReadOnly();
-//
-//    boolean isMaxReadOnly();
-
-///////////////// setters (should not commit changes to the model, but return the change objects
-
-    void setProperty(OWLProperty property);
+    ///////////////// setters (should not commit changes to the model, but
+    ///////////////// return the change objects
+            void setProperty(OWLProperty property);
 
     void setFiller(OWLObject filler);
 

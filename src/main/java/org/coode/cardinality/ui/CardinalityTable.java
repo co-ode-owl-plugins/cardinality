@@ -1,5 +1,25 @@
 package org.coode.cardinality.ui;
 
+import java.awt.Component;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
+import java.awt.event.MouseEvent;
+import java.util.EventObject;
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.swing.DefaultCellEditor;
+import javax.swing.JComponent;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
+import javax.swing.SwingConstants;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableColumn;
+import javax.swing.table.TableColumnModel;
+
 import org.coode.cardinality.model.CardinalityRow;
 import org.coode.cardinality.model.CardinalityTableModel;
 import org.coode.cardinality.prefs.CardiPrefs;
@@ -14,16 +34,6 @@ import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.OWLObject;
 import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.OWLProperty;
-
-import javax.swing.*;
-import javax.swing.table.*;
-import java.awt.*;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
-import java.awt.event.MouseEvent;
-import java.util.EventObject;
-import java.util.HashSet;
-import java.util.Set;
 
 /*
  * Copyright (C) 2007, University of Manchester
@@ -47,55 +57,45 @@ import java.util.Set;
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-
 /**
  * Author: Nick Drummond<br>
  * nick.drummond@cs.manchester.ac.uk<br>
- * http://www.cs.man.ac.uk/~drummond<br><br>
+ * http://www.cs.man.ac.uk/~drummond<br>
+ * <br>
  * <p/>
  * The University Of Manchester<br>
  * Bio Health Informatics Group<br>
- * Date: Aug 30, 2006<br><br>
+ * Date: Aug 30, 2006<br>
+ * <br>
  * <p/>
  */
 public class CardinalityTable extends BasicLinkedOWLObjectTable {
-
-//    private static int[] colWidth;
+    private static final long serialVersionUID = 1L;
 
     private DefaultTableCellRenderer defaultRen;
     private OWLCellRenderer entityRen;
     private ClosureCellRenderer closureRen;
-
-    private TableCellEditor defaultEditor;
+    protected TableCellEditor defaultEditor;
     private TableCellEditor objPropEditor;
     private TableCellEditor descrFillerEditor;
     private TableCellEditor dataFillerEditor;
     private TableCellEditor dataPropEditor;
     private OWLLiteralCellEditor dataLiteralEditor;
-
     private PropCombo objPropCombo;
     private PropCombo dataPropCombo;
     private FocusAdapter defaultCellEditorFocusListener;
     private JTextField defaultCellEditorField;
 
     public CardinalityTable(OWLEditorKit eKit) {
-
         super(new CardinalityTableModel(eKit.getModelManager()), eKit);
-
         resizeColumns();
-
         showVerticalLines = false;
         showHorizontalLines = true;
-
         setGridColor(getSelectionBackground());
         getColumnModel().setColumnMargin(0);
-
         setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-
         getTableHeader().setReorderingAllowed(false);
-
         createRenderers(eKit);
-
         createEditors(eKit);
     }
 
@@ -103,15 +103,15 @@ public class CardinalityTable extends BasicLinkedOWLObjectTable {
         TableColumnModel tcm = getColumnModel();
         for (int i = getModel().getColumnCount() - 1; i >= 0; i--) {
             TableColumn tc = tcm.getColumn(i);
-            if (i == CardinalityTableModel.COL_FILLER){
-                int w = CardiPrefs.getInstance().getInt(CardiPrefs.FILLER_COL_WIDTH, 330);
+            if (i == CardinalityTableModel.COL_FILLER) {
+                int w = CardiPrefs.getInstance()
+                        .getInt(CardiPrefs.FILLER_COL_WIDTH, 330);
                 tc.setPreferredWidth(w);
-            }
-            else if (i == CardinalityTableModel.COL_PROP){
-                int w = CardiPrefs.getInstance().getInt(CardiPrefs.PROP_COL_WIDTH, 130);
+            } else if (i == CardinalityTableModel.COL_PROP) {
+                int w = CardiPrefs.getInstance()
+                        .getInt(CardiPrefs.PROP_COL_WIDTH, 130);
                 tc.setPreferredWidth(w);
-            }
-            else {
+            } else {
                 tc.setMinWidth(30);
                 tc.setMaxWidth(30);
             }
@@ -119,39 +119,42 @@ public class CardinalityTable extends BasicLinkedOWLObjectTable {
     }
 
     private void createRenderers(OWLEditorKit eKit) {
-        entityRen = new OWLCellRenderer(eKit){
-            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-                JComponent c = (JComponent)super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+        entityRen = new OWLCellRenderer(eKit) {
+
+            @Override
+            public Component getTableCellRendererComponent(JTable table,
+                    Object value, boolean isSelected, boolean hasFocus, int row,
+                    int column) {
+                JComponent c = (JComponent) super.getTableCellRendererComponent(
+                        table, value, isSelected, hasFocus, row, column);
                 c.setOpaque(true);
-                if (isSelected){
+                if (isSelected) {
                     c.setBackground(table.getSelectionBackground());
-                }
-                else{
+                } else {
                     c.setBackground(table.getBackground());
                 }
-                if (getRowHeight(row) < c.getPreferredSize().height+2){
-                    setRowHeight(row, c.getPreferredSize().height+2);
+                if (getRowHeight(row) < c.getPreferredSize().height + 2) {
+                    setRowHeight(row, c.getPreferredSize().height + 2);
                 }
                 return c;
             }
         };
         entityRen.setHighlightKeywords(true);
-
         defaultRen = new DefaultTableCellRenderer();
         defaultRen.setVerticalAlignment(SwingConstants.TOP);
         defaultRen.setHorizontalAlignment(SwingConstants.RIGHT);
-
         closureRen = new ClosureCellRenderer(eKit.getModelManager());
         closureRen.setVerticalAlignment(SwingConstants.TOP);
-
-        setRowHeight(Math.max(getRowHeight(), closureRen.getPreferredSize().height));
+        setRowHeight(
+                Math.max(getRowHeight(), closureRen.getPreferredSize().height));
     }
 
     private void createEditors(OWLEditorKit eKit) {
-
         // default editor
         defaultCellEditorField = new JTextField();
         defaultCellEditorFocusListener = new FocusAdapter() {
+
+            @Override
             public void focusLost(FocusEvent e) {
                 defaultEditor.cancelCellEditing();
             }
@@ -159,58 +162,62 @@ public class CardinalityTable extends BasicLinkedOWLObjectTable {
         defaultCellEditorField.addFocusListener(defaultCellEditorFocusListener);
         defaultEditor = new DefaultCellEditor(defaultCellEditorField);
         defaultCellEditorField.setHorizontalAlignment(SwingConstants.RIGHT);
-
         // object property dropdown
         objPropCombo = new PropCombo(eKit, PropCombo.OBJ_PROPS);
         objPropEditor = new DefaultCellEditor(objPropCombo) {
+            private static final long serialVersionUID = 1L;
+
+            @Override
             public boolean isCellEditable(EventObject eventObject) {
                 if (eventObject instanceof MouseEvent) {
                     return ((MouseEvent) eventObject).getClickCount() >= 2;
-                }
-                else {
+                } else {
                     return super.isCellEditable(eventObject);
                 }
             }
         };
-
         // object property dropdown
         dataPropCombo = new PropCombo(eKit, PropCombo.DATA_PROPS);
         dataPropEditor = new DefaultCellEditor(dataPropCombo) {
+            private static final long serialVersionUID = 1L;
+
+            @Override
             public boolean isCellEditable(EventObject eventObject) {
                 if (eventObject instanceof MouseEvent) {
                     return ((MouseEvent) eventObject).getClickCount() >= 2;
-                }
-                else {
+                } else {
                     return super.isCellEditable(eventObject);
                 }
             }
         };
-
         // filler expression editor
         descrFillerEditor = new OWLClassExpressionCellEditor(eKit);
         ((OWLClassExpressionCellEditor) descrFillerEditor).setExpandable(true);
-
         // datatype dropdown
-        dataFillerEditor = new DefaultCellEditor(new UIHelper(eKit).getDatatypeSelector()){
+        dataFillerEditor = new DefaultCellEditor(
+                new UIHelper(eKit).getDatatypeSelector()) {
+            private static final long serialVersionUID = 1L;
+
+            @Override
             public boolean isCellEditable(EventObject eventObject) {
                 if (eventObject instanceof MouseEvent) {
                     return ((MouseEvent) eventObject).getClickCount() >= 2;
-                }
-                else {
+                } else {
                     return super.isCellEditable(eventObject);
                 }
             }
         };
-
-        dataLiteralEditor = new OWLLiteralCellEditor(new JTextField(), eKit.getModelManager());
+        dataLiteralEditor = new OWLLiteralCellEditor(new JTextField(),
+                eKit.getModelManager());
     }
 
+    @Override
     public CardinalityTableModel getModel() {
         return (CardinalityTableModel) super.getModel();
     }
 
     public Set<CardinalityRow> getSelection() {
-        Set<CardinalityRow> selection = new HashSet<CardinalityRow>();
+        Set<CardinalityRow> selection = new HashSet<>();
         // below necessary because getSelectedRows() does not work
         int minRow = getSelectionModel().getMinSelectionIndex();
         int maxRow = getSelectionModel().getMaxSelectionIndex();
@@ -227,17 +234,18 @@ public class CardinalityTable extends BasicLinkedOWLObjectTable {
         selectionModel.setSelectionInterval(rowIndex, rowIndex);
     }
 
-    public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
+    @Override
+    public Component prepareRenderer(TableCellRenderer renderer, int row,
+            int column) {
         Component c = super.prepareRenderer(renderer, row, column);
-
         if (c != null) {
             CardinalityRow r = getModel().getRow(row);
             c.setEnabled(!r.isReadOnly());
         }
-
         return c;
     }
 
+    @Override
     public TableCellRenderer getCellRenderer(int row, int col) {
         switch (col) {
             case CardinalityTableModel.COL_PROP:
@@ -253,27 +261,27 @@ public class CardinalityTable extends BasicLinkedOWLObjectTable {
         }
     }
 
+    @Override
     public TableCellEditor getCellEditor(int row, int col) {
         switch (col) {
             case CardinalityTableModel.COL_PROP:
-                OWLProperty p = (OWLProperty)getModel().getValueAt(row, CardinalityTableModel.COL_PROP);
-                if (p instanceof OWLObjectProperty){
+                OWLProperty p = (OWLProperty) getModel().getValueAt(row,
+                        CardinalityTableModel.COL_PROP);
+                if (p instanceof OWLObjectProperty) {
                     return objPropEditor;
-                }
-                else{
+                } else {
                     return dataPropEditor;
                 }
             case CardinalityTableModel.COL_FILLER:
-                OWLProperty q = (OWLProperty)getModel().getValueAt(row, CardinalityTableModel.COL_PROP);
-                if (q instanceof OWLObjectProperty){
+                OWLProperty q = (OWLProperty) getModel().getValueAt(row,
+                        CardinalityTableModel.COL_PROP);
+                if (q instanceof OWLObjectProperty) {
                     return descrFillerEditor;
-                }
-                else{
+                } else {
                     final OWLObject filler = getModel().getRow(row).getFiller();
-                    if (filler instanceof OWLLiteral){
+                    if (filler instanceof OWLLiteral) {
                         return dataLiteralEditor;
-                    }
-                    else{
+                    } else {
                         return dataFillerEditor;
                     }
                 }
@@ -286,6 +294,7 @@ public class CardinalityTable extends BasicLinkedOWLObjectTable {
         }
     }
 
+    @Override
     protected boolean isHeaderVisible() {
         return true;
     }
@@ -294,6 +303,7 @@ public class CardinalityTable extends BasicLinkedOWLObjectTable {
         getModel().dispose();
         objPropCombo.dispose();
         dataPropCombo.dispose();
-        defaultCellEditorField.removeFocusListener(defaultCellEditorFocusListener);
+        defaultCellEditorField
+                .removeFocusListener(defaultCellEditorFocusListener);
     }
 }

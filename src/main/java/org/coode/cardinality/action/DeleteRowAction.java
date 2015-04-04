@@ -1,14 +1,15 @@
 package org.coode.cardinality.action;
 
+import java.awt.event.ActionEvent;
+import java.util.Collection;
+
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+
 import org.coode.cardinality.model.CardinalityRow;
 import org.coode.cardinality.ui.CardinalityTable;
 import org.protege.editor.owl.ui.OWLIcons;
 import org.protege.editor.owl.ui.view.OWLSelectionViewAction;
-
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
-import java.awt.event.ActionEvent;
-import java.util.Collection;
 
 /*
  * Copyright (C) 2007, University of Manchester
@@ -32,22 +33,25 @@ import java.util.Collection;
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-
 /**
  * Author: Nick Drummond<br>
  * nick.drummond@cs.manchester.ac.uk<br>
- * http://www.cs.man.ac.uk/~drummond<br><br>
+ * http://www.cs.man.ac.uk/~drummond<br>
+ * <br>
  * <p/>
  * The University Of Manchester<br>
  * Bio Health Informatics Group<br>
- * Date: Aug 30, 2006<br><br>
+ * Date: Aug 30, 2006<br>
+ * <br>
  * <p/>
  */
 public class DeleteRowAction extends OWLSelectionViewAction {
+    private static final long serialVersionUID = 1L;
 
-    private CardinalityTable table;
+    private final CardinalityTable table;
+    private final ListSelectionListener l = new ListSelectionListener() {
 
-    private ListSelectionListener l = new ListSelectionListener() {
+        @Override
         public void valueChanged(ListSelectionEvent listSelectionEvent) {
             updateState();
         }
@@ -59,6 +63,7 @@ public class DeleteRowAction extends OWLSelectionViewAction {
         table.getSelectionModel().addListSelectionListener(l);
     }
 
+    @Override
     public void updateState() {
         boolean canDelete = false;
         Collection<CardinalityRow> restrs = table.getSelection();
@@ -70,10 +75,12 @@ public class DeleteRowAction extends OWLSelectionViewAction {
         setEnabled(canDelete);
     }
 
+    @Override
     public void dispose() {
         table.getSelectionModel().removeListSelectionListener(l);
     }
 
+    @Override
     public void actionPerformed(ActionEvent actionEvent) {
         table.getModel().removeRows(table.getSelection());
     }

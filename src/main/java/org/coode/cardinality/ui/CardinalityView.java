@@ -1,12 +1,13 @@
 package org.coode.cardinality.ui;
 
+import java.awt.BorderLayout;
+
+import javax.swing.JScrollPane;
+
 import org.coode.cardinality.action.AddRowAction;
 import org.coode.cardinality.action.DeleteRowAction;
 import org.protege.editor.owl.ui.view.cls.AbstractOWLClassViewComponent;
 import org.semanticweb.owlapi.model.OWLClass;
-
-import javax.swing.*;
-import java.awt.*;
 
 /*
  * Copyright (C) 2007, University of Manchester
@@ -30,47 +31,45 @@ import java.awt.*;
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-
 /**
  * Author: Nick Drummond<br>
  * nick.drummond@cs.manchester.ac.uk<br>
- * http://www.cs.man.ac.uk/~drummond<br><br>
+ * http://www.cs.man.ac.uk/~drummond<br>
+ * <br>
  * <p/>
  * The University Of Manchester<br>
  * Bio Health Informatics Group<br>
- * Date: Aug 30, 2006<br><br>
+ * Date: Aug 30, 2006<br>
+ * <br>
  * <p/>
  */
 public class CardinalityView extends AbstractOWLClassViewComponent {
+    private static final long serialVersionUID = 1L;
 
     private CardinalityTable table;
-
     private AddRowAction addRowAction;
-
     private DeleteRowAction deleteRowAction;
 
-
-    public void initialiseClassView() throws Exception {
+    @Override
+    public void initialiseClassView() {
         setLayout(new BorderLayout(6, 6));
-
         table = new CardinalityTable(getOWLEditorKit());
-
         JScrollPane scroller = new JScrollPane(table);
         add(scroller, BorderLayout.CENTER);
-
         addRowAction = new AddRowAction(table, getOWLEditorKit());
         deleteRowAction = new DeleteRowAction(table);
-
         addAction(addRowAction, "A", "A");
         addAction(deleteRowAction, "A", "B");
     }
 
+    @Override
     protected OWLClass updateView(OWLClass selectedClass) {
         table.clearSelection();
         table.getModel().setSubject(selectedClass);
         return selectedClass;
     }
 
+    @Override
     public void disposeView() {
         table.dispose();
         addRowAction.dispose();

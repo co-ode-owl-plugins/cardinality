@@ -1,15 +1,29 @@
 package org.coode.cardinality.model;
 
-import org.coode.cardinality.prefs.CardiPrefs;
-import org.coode.cardinality.prefs.CardinalityProperties;
-import org.protege.editor.owl.model.OWLModelManager;
-import org.semanticweb.owlapi.model.*;
-
-import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
+
+import javax.swing.table.AbstractTableModel;
+
+import org.coode.cardinality.prefs.CardiPrefs;
+import org.coode.cardinality.prefs.CardinalityProperties;
+import org.protege.editor.owl.model.OWLModelManager;
+import org.semanticweb.owlapi.model.OWLAxiom;
+import org.semanticweb.owlapi.model.OWLClass;
+import org.semanticweb.owlapi.model.OWLClassExpression;
+import org.semanticweb.owlapi.model.OWLDataProperty;
+import org.semanticweb.owlapi.model.OWLIndividual;
+import org.semanticweb.owlapi.model.OWLLiteral;
+import org.semanticweb.owlapi.model.OWLObject;
+import org.semanticweb.owlapi.model.OWLObjectComplementOf;
+import org.semanticweb.owlapi.model.OWLObjectProperty;
+import org.semanticweb.owlapi.model.OWLOntologyChange;
+import org.semanticweb.owlapi.model.OWLOntologyChangeListener;
+import org.semanticweb.owlapi.model.OWLProperty;
+import org.semanticweb.owlapi.model.OWLRestriction;
+import org.semanticweb.owlapi.model.OWLSubClassOfAxiom;
 
 /*
  * Copyright (C) 2007, University of Manchester
@@ -33,18 +47,20 @@ import java.util.Set;
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-
 /**
  * Author: Nick Drummond<br>
  * nick.drummond@cs.manchester.ac.uk<br>
- * http://www.cs.man.ac.uk/~drummond<br><br>
+ * http://www.cs.man.ac.uk/~drummond<br>
+ * <br>
  * <p/>
  * The University Of Manchester<br>
  * Bio Health Informatics Group<br>
- * Date: Aug 30, 2006<br><br>
+ * Date: Aug 30, 2006<br>
+ * <br>
  * <p/>
  */
 public class CardinalityTableModel extends AbstractTableModel {
+    private static final long serialVersionUID = 1L;
 
     public static final int COL_PROP = 0;
     public static final int COL_MIN = 1;
@@ -52,21 +68,15 @@ public class CardinalityTableModel extends AbstractTableModel {
     public static final int COL_FILLER = 3;
     public static final int COL_CLOSED = 4;
     public static final int COL_COUNT = 5;
-
-    private static final Class[] COL_CLASSES = {OWLObjectProperty.class,
-                                                Integer.class,
-                                                Integer.class,
-                                                OWLObject.class,
-                                                Boolean.class};
-
+    private static final Class[] COL_CLASSES = { OWLObjectProperty.class,
+            Integer.class, Integer.class, OWLObject.class, Boolean.class };
     private static String[] colNames;
+    private final OWLModelManager mngr;
+    private final CardinalityRowFactory rowFactory;
+    private final OWLOntologyChangeListener cl = new OWLOntologyChangeListener() {
 
-    private OWLModelManager mngr;
-
-    private CardinalityRowFactory rowFactory;
-
-    private OWLOntologyChangeListener cl = new OWLOntologyChangeListener() {
-        public void ontologiesChanged(List<? extends OWLOntologyChange> list) throws OWLException {
+        @Override
+        public void ontologiesChanged(List<? extends OWLOntologyChange> list) {
             handleOntologiesChanged(list);
         }
     };
@@ -75,7 +85,8 @@ public class CardinalityTableModel extends AbstractTableModel {
         super();
         this.mngr = mngr;
         rowFactory = new CardinalityRowFactory(mngr);
-        rowFactory.setShowInherited(CardiPrefs.getInstance().getBoolean(CardiPrefs.OPT_SHOW_INHERITED_RESTRS, true));
+        rowFactory.setShowInherited(CardiPrefs.getInstance()
+                .getBoolean(CardiPrefs.OPT_SHOW_INHERITED_RESTRS, true));
         mngr.addOntologyChangeListener(cl);
     }
 
@@ -103,7 +114,7 @@ public class CardinalityTableModel extends AbstractTableModel {
 
     public int getRow(OWLRestriction restr) {
         List<CardinalityRow> rows = rowFactory.getRows();
-        for (int i=0; i<rows.size(); i++) {
+        for (int i = 0; i < rows.size(); i++) {
             if (rows.get(i).contains(restr)) {
                 return i;
             }
@@ -111,12 +122,13 @@ public class CardinalityTableModel extends AbstractTableModel {
         return -1;
     }
 
-/////////////////////////////////// TableModel implementation
-
+    /////////////////////////////////// TableModel implementation
+    @Override
     public Class getColumnClass(int columnIndex) {
         return COL_CLASSES[columnIndex];
     }
 
+    @Override
     public String getColumnName(int column) {
         if (colNames == null) {
             Properties props = CardinalityProperties.getInstance();
@@ -127,18 +139,19 @@ public class CardinalityTableModel extends AbstractTableModel {
         }
         return colNames[column];
     }
-    
+
+    @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
         Object value = null;
         CardinalityRow restr = rowFactory.getRows().get(rowIndex);
         switch (columnIndex) {
             case COL_MIN:
                 int min = restr.getMin();
-                value = (min < 0) ? "" : Integer.toString(min);
+                value = min < 0 ? "" : Integer.toString(min);
                 break;
             case COL_MAX:
                 int max = restr.getMax();
-                value = (max < 0) ? "" : Integer.toString(max);
+                value = max < 0 ? "" : Integer.toString(max);
                 break;
             case COL_PROP:
                 value = restr.getProperty();
@@ -150,37 +163,41 @@ public class CardinalityTableModel extends AbstractTableModel {
                 value = restr.isClosed();
                 break;
         }
-
         return value;
     }
 
+    @Override
     public int getColumnCount() {
         return COL_COUNT;
     }
 
+    @Override
     public int getRowCount() {
         return rowFactory.getRows().size();
     }
 
+    @Override
     public boolean isCellEditable(int rowIndex, int columnIndex) {
         boolean result = true;
         if (rowFactory.getRows().get(rowIndex).isReadOnly()) {
             result = false;
-        }
-        else {
+        } else {
             switch (columnIndex) {
                 case COL_MIN: // fallthrough
                 case COL_MAX:
-                    // cannot edit the min, max of 1 if this is a hasValue restriction
-                    if (getRow(rowIndex).getFiller() instanceof OWLIndividual ||
-                            getRow(rowIndex).getFiller() instanceof OWLLiteral){
+                    // cannot edit the min, max of 1 if this is a hasValue
+                    // restriction
+                    if (getRow(rowIndex).getFiller() instanceof OWLIndividual
+                            || getRow(rowIndex)
+                                    .getFiller() instanceof OWLLiteral) {
                         result = false;
                     }
                     break;
                 case COL_CLOSED:
-                    OWLProperty prop = (OWLProperty) getValueAt(rowIndex, CardinalityTableModel.COL_PROP);
-                    if (prop instanceof OWLDataProperty ||
-                        getRow(rowIndex).getMax() == 0) {
+                    OWLProperty prop = (OWLProperty) getValueAt(rowIndex,
+                            CardinalityTableModel.COL_PROP);
+                    if (prop instanceof OWLDataProperty
+                            || getRow(rowIndex).getMax() == 0) {
                         result = false;
                     }
                     break;
@@ -189,23 +206,22 @@ public class CardinalityTableModel extends AbstractTableModel {
         return result;
     }
 
+    @Override
     public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
-        List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
+        List<OWLOntologyChange> changes = new ArrayList<>();
         CardinalityRow restr = rowFactory.getRows().get(rowIndex);
         switch (columnIndex) {
             case COL_MIN:
                 try {
                     restr.setMin(Integer.parseInt((String) aValue));
-                }
-                catch (NumberFormatException e) {
+                } catch (NumberFormatException e) {
                     restr.setMin(CardinalityRow.NO_VALUE);
                 }
                 break;
             case COL_MAX:
                 try {
                     restr.setMax(Integer.parseInt((String) aValue));
-                }
-                catch (NumberFormatException e) {
+                } catch (NumberFormatException e) {
                     restr.setMax(CardinalityRow.NO_VALUE);
                 }
                 break;
@@ -219,15 +235,14 @@ public class CardinalityTableModel extends AbstractTableModel {
                 restr.setClosed((Boolean) aValue);
                 break;
         }
-
         changes.addAll(restr.getChanges());
-
         mngr.applyChanges(changes);
     }
 
-    private void handleOntologiesChanged(List<? extends OWLOntologyChange> list) {
+    protected void
+            handleOntologiesChanged(List<? extends OWLOntologyChange> list) {
         boolean reload = false;
-        for (OWLOntologyChange ontologyChange : list){
+        for (OWLOntologyChange ontologyChange : list) {
             OWLClassExpression subclass = null;
             OWLClassExpression superclass = null;
             OWLAxiom axiom = ontologyChange.getAxiom();
@@ -235,26 +250,24 @@ public class CardinalityTableModel extends AbstractTableModel {
                 subclass = ((OWLSubClassOfAxiom) axiom).getSubClass();
                 superclass = ((OWLSubClassOfAxiom) axiom).getSuperClass();
             }
-
             if (subclass != null) {
-                if ((subclass.equals(getSubject())) ||
-                    (mngr.getOWLHierarchyManager().getOWLClassHierarchyProvider().getAncestors(getSubject()).contains(subclass))) {
-                    if (superclass instanceof OWLClass ||
-                        superclass instanceof OWLRestriction ||
-                        superclass instanceof OWLObjectComplementOf) {
+                if (subclass.equals(getSubject()) || mngr
+                        .getOWLHierarchyManager().getOWLClassHierarchyProvider()
+                        .getAncestors(getSubject()).contains(subclass)) {
+                    if (superclass instanceof OWLClass
+                            || superclass instanceof OWLRestriction
+                            || superclass instanceof OWLObjectComplementOf) {
                         reload = true;
                     }
                 }
             }
         }
-        if (reload){
+        if (reload) {
             rowFactory.reload();
             fireTableDataChanged();
         }
     }
-
-//////////////////////////////////////////////////////////
-
+    //////////////////////////////////////////////////////////
 
     public void dispose() {
         mngr.removeOntologyChangeListener(cl);

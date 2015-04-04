@@ -1,13 +1,16 @@
 package org.coode.cardinality.ui;
 
+import java.awt.Color;
+import java.awt.Component;
+
+import javax.swing.JCheckBox;
+import javax.swing.JTable;
+import javax.swing.table.TableCellRenderer;
+
 import org.coode.cardinality.model.CardinalityRow;
 import org.coode.cardinality.model.CardinalityTableModel;
 import org.coode.cardinality.util.ClosureUtils;
 import org.protege.editor.owl.model.OWLModelManager;
-
-import javax.swing.*;
-import javax.swing.table.TableCellRenderer;
-import java.awt.*;
 
 /*
  * Copyright (C) 2007, University of Manchester
@@ -31,56 +34,58 @@ import java.awt.*;
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-
 /**
  * Author: Nick Drummond<br>
  * nick.drummond@cs.manchester.ac.uk<br>
- * http://www.cs.man.ac.uk/~drummond<br><br>
+ * http://www.cs.man.ac.uk/~drummond<br>
+ * <br>
  * <p/>
  * The University Of Manchester<br>
  * Bio Health Informatics Group<br>
- * Date: Aug 30, 2006<br><br>
+ * Date: Aug 30, 2006<br>
+ * <br>
  * <p/>
  */
-public class ClosureCellRenderer extends JCheckBox implements TableCellRenderer {
+public class ClosureCellRenderer extends JCheckBox
+        implements TableCellRenderer {
+    private static final long serialVersionUID = 1L;
 
-    private ClosureUtils closureUtil;
+    private final ClosureUtils closureUtil;
 
     public ClosureCellRenderer(OWLModelManager mngr) {
         super();
         closureUtil = new ClosureUtils(mngr);
         setHorizontalAlignment(CENTER);
-        setOpaque(true);        
+        setOpaque(true);
     }
 
-    public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean b, int row, int col) {
+    @Override
+    public Component getTableCellRendererComponent(JTable table, Object value,
+            boolean isSelected, boolean b, int row, int col) {
         boolean highlight = false;
         if (value.equals(Boolean.FALSE)) {
-            CardinalityTableModel cardiModel = (CardinalityTableModel) table.getModel();
+            CardinalityTableModel cardiModel = (CardinalityTableModel) table
+                    .getModel();
             CardinalityRow r = cardiModel.getRow(row);
             if (r.getMax() != 0) {
                 // find if there is a candidate closure axiom for the property
                 // (which means this filler must be missing)
-                if (closureUtil.getCandidateClosureAxioms(r.getSubject(), r.getProperty()).size() > 0) {
+                if (closureUtil.getCandidateClosureAxioms(r.getSubject(),
+                        r.getProperty()).size() > 0) {
                     highlight = true;
                 }
             }
         }
-
-        if (highlight){
+        if (highlight) {
             setBackground(Color.RED);
-        }
-        else{
-            if (isSelected){
+        } else {
+            if (isSelected) {
                 setBackground(table.getSelectionBackground());
-            }
-            else{
+            } else {
                 setBackground(table.getBackground());
             }
         }
-
-        setSelected(((Boolean)value));
-        
+        setSelected((Boolean) value);
         return this;
     }
 }

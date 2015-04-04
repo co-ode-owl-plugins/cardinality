@@ -1,14 +1,15 @@
 package org.coode.cardinality.test;
 
-import junit.framework.TestCase;
+import java.net.URI;
+import java.net.URISyntaxException;
+
 import org.apache.log4j.Logger;
 import org.coode.cardinality.model.CardinalityTableModel;
 import org.protege.editor.owl.model.OWLModelManagerImpl;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLClass;
 
-import java.net.URI;
-import java.net.URISyntaxException;
+import junit.framework.TestCase;
 
 /*
  * Copyright (C) 2007, University of Manchester
@@ -32,32 +33,30 @@ import java.net.URISyntaxException;
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-
 /**
  * Author: Nick Drummond<br>
  * nick.drummond@cs.manchester.ac.uk<br>
- * http://www.cs.man.ac.uk/~drummond<br><br>
+ * http://www.cs.man.ac.uk/~drummond<br>
+ * <br>
  * <p/>
  * The University Of Manchester<br>
  * Bio Health Informatics Group<br>
- * Date: Aug 30, 2006<br><br>
+ * Date: Aug 30, 2006<br>
+ * <br>
  * <p/>
  */
 public class TestCardinalityTableModel extends TestCase {
 
     OWLModelManagerImpl mngr;
     CardinalityTableModel model;
-
     private static final String BASE_URI = "http://www.co-ode.org/ontologies/pizza/2006/07/18/pizza.owl";
 
     void setup() {
         try {
             mngr = new OWLModelManagerImpl();
             mngr.loadOntologyFromPhysicalURI(new URI(BASE_URI));
-
             model = new CardinalityTableModel(mngr);
-        }
-        catch (URISyntaxException e) {
+        } catch (URISyntaxException e) {
             Logger.getLogger(TestCardinalityTableModel.class).error(e);
         }
     }
@@ -65,11 +64,11 @@ public class TestCardinalityTableModel extends TestCase {
     public void testFirst() {
         try {
             setup();
-            OWLClass margherita = mngr.getOWLDataFactory().getOWLClass(IRI.create(BASE_URI + "#" + "MargheritaPizza"));
+            OWLClass margherita = mngr.getOWLDataFactory().getOWLClass(
+                    IRI.create(BASE_URI + "#" + "MargheritaPizza"));
             model.setSubject(margherita);
-            assert(model.getRowCount() == 2);
-        }
-        catch (Exception e) {
+            assert model.getRowCount() == 2;
+        } catch (Exception e) {
             Logger.getLogger(TestCardinalityTableModel.class).error(e);
         }
     }
